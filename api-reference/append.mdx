@@ -1,0 +1,270 @@
+---
+title: "Append to Notion Page"
+api: "POST https://api.mark2notion.com/api/append"
+description: "Convert Markdown and append it directly to a Notion page"
+---
+
+## Overview
+
+The append endpoint converts Markdown text to Notion blocks and appends them directly to an existing Notion page. This combines the convert functionality with direct Notion integration.
+
+## Request
+
+<ParamField header="x-api-key" type="string" required>
+  Your Mark2Notion API key
+</ParamField>
+
+<ParamField body="markdown" type="string" required>
+  The Markdown content to convert and append
+</ParamField>
+
+<ParamField body="notionToken" type="string" required>
+  Your Notion integration token (from notion.so/my-integrations)
+</ParamField>
+
+<ParamField body="pageId" type="string" required>
+  The ID of the Notion page to append content to
+</ParamField>
+
+<ParamField body="after" type="string">
+  Optional block ID to append content after. If not provided, content is appended to the end of the page.
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Will be "success" for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="data">
+    <ResponseField name="totalBlocks" type="number">
+      Total number of blocks that were appended
+    </ResponseField>
+    <ResponseField name="requestCount" type="number">
+      Number of API requests made to Notion (used for usage tracking)
+    </ResponseField>
+    <ResponseField name="retryCount" type="number">
+      Number of retry attempts due to rate limiting
+    </ResponseField>
+    <ResponseField name="lastBlockId" type="string">
+      ID of the last block that was created (useful for subsequent appends)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.mark2notion.com/api/append" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "markdown": "# New Section\n\nThis content will be appended to my Notion page.\n\n- Item 1\n- Item 2",
+    "notionToken": "secret_NOTION_INTEGRATION_TOKEN",
+    "pageId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.mark2notion.com/api/append', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    markdown: `# New Section
+
+This content will be appended to my Notion page.
+
+- Item 1
+- Item 2`,
+    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
+    pageId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+  })
+});
+
+const data = await response.json();
+console.log(`Added ${data.data.totalBlocks} blocks`);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.mark2notion.com/api/append',
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    },
+    json={
+        'markdown': '''# New Section
+
+This content will be appended to my Notion page.
+
+- Item 1
+- Item 2''',
+        'notionToken': 'secret_NOTION_INTEGRATION_TOKEN',
+        'pageId': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+    }
+)
+
+data = response.json()
+print(f"Added {data['data']['totalBlocks']} blocks")
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Example Response
+{
+  "status": "success",
+  "data": {
+    "totalBlocks": 4,
+    "requestCount": 1,
+    "retryCount": 0,
+    "lastBlockId": "f9e8d7c6-b5a4-3210-9876-543210fedcba"
+  }
+}
+```
+
+</ResponseExample>
+
+## Append Positioning
+
+### Default Behavior
+By default, content is appended to the end of the page.
+
+### Using the `after` Parameter
+Specify a block ID to append content after a specific block:
+
+```json
+{
+  "markdown": "# New content",
+  "notionToken": "secret_...",
+  "pageId": "page-id",
+  "after": "block-id-to-append-after"
+}
+```
+
+### Chaining Appends
+Use the `lastBlockId` from the response to chain multiple append operations:
+
+```javascript
+// First append
+const firstAppend = await appendToNotion({
+  markdown: "# First section",
+  // ... other params
+});
+
+// Second append after the first
+const secondAppend = await appendToNotion({
+  markdown: "# Second section", 
+  after: firstAppend.data.lastBlockId,
+  // ... other params
+});
+```
+
+## Rate Limiting & Retries
+
+The append endpoint includes intelligent rate limiting:
+
+- **Automatic chunking**: Large content is split into chunks of 100 blocks
+- **Sequential processing**: Chunks are processed in order to maintain content sequence
+- **Retry logic**: Automatic retries with exponential backoff for rate limits
+- **Respectful timing**: 400ms delay between requests to respect Notion's limits
+
+<Info>
+The `requestCount` in the response indicates how many Notion API calls were made, which affects your usage quota.
+</Info>
+
+## Notion Setup
+
+Before using the append endpoint, you need:
+
+1. **Create a Notion Integration**
+   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
+   - Create a new integration
+   - Copy the integration token
+
+2. **Share Your Page**
+   - Open your Notion page
+   - Click "Share" → "Invite"
+   - Add your integration
+
+3. **Get the Page ID**
+   - From the page URL: `notion.so/page-name-PAGE_ID`
+   - Or from the "Copy link" option
+
+## Error Responses
+
+<ResponseExample>
+
+```json 400 - Validation Error
+{
+  "status": "fail",
+  "data": {
+    "notionToken": "Missing or invalid Notion token",
+    "pageId": "Invalid page ID format"
+  }
+}
+```
+
+```json 403 - Notion Access Error
+{
+  "status": "error",
+  "message": "Page not found or access denied"
+}
+```
+
+```json 401 - Invalid Notion Token
+{
+  "status": "error", 
+  "message": "Invalid Notion token or insufficient permissions"
+}
+```
+
+```json 429 - Rate Limited
+{
+  "status": "error",
+  "message": "Usage quota exceeded for current billing period",
+  "data": {
+    "current_usage": 1000,
+    "quota": 1000,
+    "plan": "free",
+    "requests_remaining": 0
+  }
+}
+```
+
+</ResponseExample>
+
+## Usage Notes
+
+<Info>
+The append endpoint counts as multiple API calls if your content requires multiple chunks. Check the `requestCount` in the response.
+</Info>
+
+<Tip>
+For better performance with large content, consider using the convert endpoint first to check the block count, then decide whether to use append or handle it in smaller pieces.
+</Tip>
+
+<Warning>
+Make sure your Notion integration has access to the target page. The integration must be explicitly shared with the page.
+</Warning>
+
+## Idempotency
+
+The append endpoint includes built-in idempotency protection:
+
+- Duplicate requests with the same content and parameters are automatically detected
+- Returns the original response for duplicate requests
+- Prevents accidental duplicate content on your pages
+
+<Note>
+Idempotency is based on the combination of API key, page ID, markdown content, and position parameters.
+</Note>

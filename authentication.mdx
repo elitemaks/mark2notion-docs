@@ -1,0 +1,145 @@
+---
+title: 'Authentication'
+description: 'How to authenticate your requests and manage API usage'
+---
+
+## API Key Authentication
+
+Mark2Notion uses API key authentication. Include your API key in the `x-api-key` header for all requests.
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.mark2notion.com/api/convert" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"markdown": "# Test"}'
+```
+
+```javascript JavaScript
+const headers = {
+  'x-api-key': 'YOUR_API_KEY',
+  'Content-Type': 'application/json'
+};
+```
+
+```python Python
+headers = {
+    'x-api-key': 'YOUR_API_KEY',
+    'Content-Type': 'application/json'
+}
+```
+
+</CodeGroup>
+
+## Getting Your API Key
+
+1. **Sign up** at [mark2notion.com](https://mark2notion.com)
+2. **Navigate** to your dashboard
+3. **Copy** your API key from the API section
+4. **Keep it secure** - never expose it in client-side code
+
+<Warning>
+Your API key is sensitive. Never include it in client-side code or commit it to version control.
+</Warning>
+
+## Usage Limits
+
+API usage is tracked and limited based on your subscription plan:
+
+| Plan | Monthly Requests | Rate Limit |
+|------|------------------|------------|
+| Free | 1,000 | 10 req/min |
+| Pro  | 50,000 | 100 req/min |
+
+### Rate Limiting
+
+The API implements intelligent rate limiting:
+
+- **Respect Notion's limits**: 3 requests per second to Notion API
+- **Automatic retries**: Built-in exponential backoff for rate limits
+- **Usage tracking**: Real-time tracking of your quota usage
+
+### Usage Headers
+
+Each response includes usage information in headers:
+
+```http
+X-Usage-Current: 150
+X-Usage-Quota: 1000
+X-Usage-Remaining: 850
+X-Usage-Plan: free
+```
+
+## Error Responses
+
+### Authentication Errors
+
+<CodeGroup>
+
+```json 401 - Missing API Key
+{
+  "status": "error",
+  "message": "Missing x-api-key"
+}
+```
+
+```json 403 - Invalid API Key
+{
+  "status": "error", 
+  "message": "Invalid API key"
+}
+```
+
+```json 429 - Usage Limit Exceeded
+{
+  "status": "error",
+  "message": "Usage quota exceeded for current billing period",
+  "data": {
+    "current_usage": 1000,
+    "quota": 1000,
+    "plan": "free",
+    "requests_remaining": 0
+  }
+}
+```
+
+</CodeGroup>
+
+## Best Practices
+
+<Tip>
+**Secure Storage**: Store your API key in environment variables, not in your code.
+</Tip>
+
+<Tip>
+**Monitor Usage**: Check the usage headers to avoid hitting limits unexpectedly.
+</Tip>
+
+<Tip>
+**Handle Errors**: Always implement proper error handling for authentication failures.
+</Tip>
+
+## Example: Secure Implementation
+
+<CodeGroup>
+
+```javascript JavaScript
+// ✅ Good - using environment variable
+const apiKey = process.env.MARK2NOTION_API_KEY;
+
+// ❌ Bad - hardcoded API key
+const apiKey = "mk_live_abcd1234...";
+```
+
+```python Python
+import os
+
+# ✅ Good - using environment variable
+api_key = os.getenv('MARK2NOTION_API_KEY')
+
+# ❌ Bad - hardcoded API key
+api_key = "mk_live_abcd1234..."
+```
+
+</CodeGroup>

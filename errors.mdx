@@ -1,0 +1,313 @@
+---
+title: 'Error Handling'
+description: 'Understanding and handling Mark2Notion API errors'
+---
+
+## Error Response Format
+
+All Mark2Notion API errors follow a consistent format to help you handle them programmatically.
+
+## Response Types
+
+### Success Response
+```json
+{
+  "status": "success",
+  "data": {
+    // Response data
+  }
+}
+```
+
+### Validation Errors (400)
+Used when request parameters are invalid or missing.
+
+```json
+{
+  "status": "fail",
+  "data": {
+    "field_name": "Error description for this field",
+    "another_field": "Another validation error"
+  }
+}
+```
+
+### Authentication Errors (401, 403)
+```json
+{
+  "status": "error",
+  "message": "Authentication error description"
+}
+```
+
+### Rate Limit Errors (429)
+```json
+{
+  "status": "error",
+  "message": "Usage quota exceeded for current billing period",
+  "data": {
+    "current_usage": 1000,
+    "quota": 1000,
+    "plan": "free",
+    "requests_remaining": 0
+  }
+}
+```
+
+### Server Errors (500)
+```json
+{
+  "status": "error",
+  "message": "Internal server error description"
+}
+```
+
+## Common Error Scenarios
+
+### Authentication Issues
+
+<Accordion title="401 - Missing API Key">
+**Cause**: No `x-api-key` header provided
+
+**Solution**: Include your API key in the request headers
+
+```bash
+curl -H "x-api-key: YOUR_API_KEY" \
+  "https://api.mark2notion.com/api/convert"
+```
+</Accordion>
+
+<Accordion title="403 - Invalid API Key">
+**Cause**: API key is invalid, expired, or deactivated
+
+**Solution**: 
+- Check your API key in the dashboard
+- Generate a new API key if needed
+- Ensure your subscription is active
+</Accordion>
+
+<Accordion title="403 - No Active Subscription">
+**Cause**: Your subscription is inactive or cancelled
+
+**Solution**: Reactivate your subscription in the dashboard
+</Accordion>
+
+### Usage Limits
+
+<Accordion title="429 - Quota Exceeded">
+**Cause**: You've exceeded your monthly request quota
+
+**Solution**: 
+- Wait for your quota to reset next month
+- Upgrade to a higher plan
+- Monitor usage with response headers
+
+**Headers to monitor**:
+```
+X-Usage-Current: 950
+X-Usage-Quota: 1000
+X-Usage-Remaining: 50
+```
+</Accordion>
+
+### Notion-Related Errors
+
+<Accordion title="Invalid Notion Token">
+**Error**: `"Invalid Notion token or insufficient permissions"`
+
+**Causes**:
+- Wrong token format
+- Token has been revoked
+- Integration doesn't have access to the workspace
+
+**Solution**: 
+1. Check your token at [notion.so/my-integrations](https://notion.so/my-integrations)
+2. Ensure the integration is active
+3. Verify workspace permissions
+</Accordion>
+
+<Accordion title="Page Not Found">
+**Error**: `"Page not found or access denied"`
+
+**Causes**:
+- Page ID is incorrect
+- Page has been deleted
+- Integration doesn't have access to the page
+- Page is in a different workspace
+
+**Solution**:
+1. Verify the page ID from the URL
+2. Share the page with your integration
+3. Check if the page exists
+</Accordion>
+
+### Content Validation
+
+<Accordion title="Invalid Markdown">
+**Error**: `{"status": "fail", "data": {"markdown": "Missing or invalid markdown content"}}`
+
+**Causes**:
+- Empty markdown string
+- Markdown parameter missing
+- Content too large
+
+**Solution**: Provide valid markdown content in the request body
+</Accordion>
+
+## Error Handling Best Practices
+
+### 1. Check Response Status
+Always check the HTTP status code and response status field:
+
+<CodeGroup>
+
+```javascript JavaScript
+const response = await fetch('/api/convert', {
+  // ... request options
+});
+
+if (!response.ok) {
+  const error = await response.json();
+  
+  switch (response.status) {
+    case 400:
+      // Handle validation errors
+      console.log('Validation errors:', error.data);
+      break;
+    case 401:
+    case 403:
+      // Handle authentication errors
+      console.log('Auth error:', error.message);
+      break;
+    case 429:
+      // Handle rate limiting
+      console.log('Rate limited:', error.data);
+      break;
+    default:
+      console.log('Unexpected error:', error.message);
+  }
+  return;
+}
+
+const data = await response.json();
+// Handle success
+```
+
+```python Python
+import requests
+
+try:
+    response = requests.post('/api/convert', json=data)
+    response.raise_for_status()  # Raises exception for 4xx/5xx
+    
+    result = response.json()
+    # Handle success
+    
+except requests.HTTPError as e:
+    error_data = e.response.json()
+    
+    if e.response.status_code == 400:
+        # Handle validation errors
+        print("Validation errors:", error_data['data'])
+    elif e.response.status_code in [401, 403]:
+        # Handle authentication
+        print("Auth error:", error_data['message'])
+    elif e.response.status_code == 429:
+        # Handle rate limiting
+        print("Rate limited:", error_data['data'])
+    else:
+        print("Unexpected error:", error_data['message'])
+```
+
+</CodeGroup>
+
+### 2. Implement Retry Logic
+For rate limiting and transient errors:
+
+```javascript
+async function callAPIWithRetry(apiCall, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await apiCall();
+      
+      if (response.status === 429) {
+        // Rate limited - wait and retry
+        const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      
+      return response;
+    } catch (error) {
+      if (attempt === maxRetries) throw error;
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+```
+
+### 3. Monitor Usage
+Track your API usage to avoid hitting limits:
+
+```javascript
+function logUsageInfo(response) {
+  const usage = {
+    current: response.headers.get('X-Usage-Current'),
+    quota: response.headers.get('X-Usage-Quota'),
+    remaining: response.headers.get('X-Usage-Remaining'),
+    plan: response.headers.get('X-Usage-Plan')
+  };
+  
+  console.log('API Usage:', usage);
+  
+  // Warn when approaching limit
+  if (usage.remaining < usage.quota * 0.1) {
+    console.warn('Approaching usage limit!');
+  }
+}
+```
+
+### 4. Graceful Degradation
+Handle errors gracefully in your application:
+
+```javascript
+async function convertMarkdown(markdown) {
+  try {
+    const response = await callAPI('/api/convert', { markdown });
+    return response.data.blocks;
+  } catch (error) {
+    // Log error for debugging
+    console.error('Markdown conversion failed:', error);
+    
+    // Return fallback or throw user-friendly error
+    throw new Error('Unable to convert markdown at this time. Please try again later.');
+  }
+}
+```
+
+## Getting Help
+
+If you encounter errors not covered here:
+
+<CardGroup cols={2}>
+  <Card
+    title="Report Issues"
+    icon="bug"
+    href="https://github.com/elitemaks/mark2notion-docs/issues"
+  >
+    Report bugs or unexpected behavior
+  </Card>
+  <Card
+    title="Give Feedback"
+    icon="message"
+    href="/feedback"
+  >
+    Share your experience and suggestions
+  </Card>
+</CardGroup>
+
+<Tip>
+When reporting issues, include the full error response and the request that caused it (without sensitive data like API keys).
+</Tip>

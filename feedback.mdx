@@ -1,0 +1,212 @@
+---
+title: 'Feedback & Support'
+description: 'Help us improve Mark2Notion API'
+---
+
+## We Want Your Feedback!
+
+Your feedback helps us build a better API. Whether you've found a bug, have a feature request, or just want to share your experience, we'd love to hear from you.
+
+## Quick Feedback
+
+Use the feedback buttons at the bottom of each documentation page to quickly rate content and suggest improvements.
+
+## Report Issues
+
+Found a bug or unexpected behavior? Please report it so we can fix it quickly.
+
+<Card
+  title="Report on GitHub"
+  icon="github"
+  href="https://github.com/elitemaks/mark2notion-docs/issues/new"
+>
+  Create a detailed bug report or feature request on GitHub
+</Card>
+
+### What to Include in Bug Reports
+
+To help us resolve issues quickly, please include:
+
+<AccordionGroup>
+  <Accordion title="Request Details">
+    - HTTP method and endpoint
+    - Request headers (without API key)
+    - Request body (sample data)
+    - Expected vs actual behavior
+  </Accordion>
+  
+  <Accordion title="Error Information">
+    - Full error response
+    - HTTP status code
+    - Timestamp when the error occurred
+    - Frequency (one-time or recurring)
+  </Accordion>
+  
+  <Accordion title="Environment Details">
+    - Programming language/framework
+    - SDK version (if applicable)
+    - Operating system
+    - Any relevant code snippets
+  </Accordion>
+</AccordionGroup>
+
+### Example Bug Report
+
+```markdown
+**Describe the bug**
+The append endpoint returns a 500 error when appending large markdown content (>5000 characters).
+
+**Request**
+```
+POST /api/append
+Headers: x-api-key: [REDACTED]
+Body: {
+  "markdown": "[large content here]",
+  "notionToken": "[REDACTED]", 
+  "pageId": "abc123..."
+}
+```
+
+**Error Response**
+```json
+{
+  "status": "error",
+  "message": "Internal server error"
+}
+```
+
+**Expected Behavior**
+Content should be successfully appended to the Notion page.
+
+**Environment**
+- Language: JavaScript/Node.js
+- OS: macOS 14.1
+- Content size: ~6000 characters
+```
+
+## Feature Requests
+
+Have an idea for improving the API? We'd love to hear it!
+
+<CardGroup cols={2}>
+  <Card
+    title="Request Features"
+    icon="lightbulb"
+    href="https://github.com/elitemaks/mark2notion-docs/issues/new?template=feature_request.md"
+  >
+    Suggest new features or improvements
+  </Card>
+  <Card
+    title="API Enhancements"
+    icon="code"
+    href="https://github.com/elitemaks/mark2notion-docs/discussions"
+  >
+    Discuss API improvements and integrations
+  </Card>
+</CardGroup>
+
+### Popular Feature Requests
+
+Some features that are commonly requested:
+
+- **Bulk operations**: Process multiple pages in one request
+- **Webhook support**: Get notified when operations complete
+- **Template support**: Use predefined page templates
+- **Advanced formatting**: Support for more Notion block types
+- **Rate limit optimization**: Higher limits for enterprise users
+
+<Tip>
+Before requesting a feature, check existing issues to see if someone else has already requested it. You can upvote existing requests with 👍 reactions.
+</Tip>
+
+## General Feedback
+
+We're always looking to improve the overall experience:
+
+<AccordionGroup>
+  <Accordion title="Documentation">
+    - Are the docs clear and helpful?
+    - What examples would be useful?
+    - What's missing or confusing?
+  </Accordion>
+  
+  <Accordion title="API Design">
+    - Are the endpoints intuitive?
+    - Is the response format helpful?
+    - What would make integration easier?
+  </Accordion>
+  
+  <Accordion title="Performance">
+    - How's the response time?
+    - Any reliability issues?
+    - Suggestions for optimization?
+  </Accordion>
+  
+  <Accordion title="Developer Experience">
+    - How's the onboarding process?
+    - Any pain points in integration?
+    - What tools would help?
+  </Accordion>
+</AccordionGroup>
+
+## Community
+
+Join our community to discuss use cases, share integrations, and get help from other developers:
+
+<Card
+  title="GitHub Discussions"
+  icon="comments"
+  href="https://github.com/elitemaks/mark2notion-docs/discussions"
+>
+  Connect with other Mark2Notion API users
+</Card>
+
+## Response Times
+
+We aim to respond to all feedback within:
+
+- 🐛 **Bug reports**: 24-48 hours
+- 💡 **Feature requests**: 3-5 days  
+- 📝 **Documentation issues**: 1-2 days
+- 💬 **General feedback**: 2-3 days
+
+<Note>
+Response times may be longer during weekends and holidays.
+</Note>
+
+## Thank You!
+
+Your feedback is invaluable in making Mark2Notion API better for everyone. Every bug report, feature request, and suggestion helps us build something amazing.
+
+## Quick Links
+
+<CardGroup cols={2}>
+  <Card
+    title="Report Bug"
+    icon="bug"
+    href="https://github.com/elitemaks/mark2notion-docs/issues/new?labels=bug"
+  >
+    Something's not working as expected
+  </Card>
+  <Card
+    title="Request Feature"
+    icon="plus"
+    href="https://github.com/elitemaks/mark2notion-docs/issues/new?labels=enhancement"
+  >
+    Suggest a new feature or improvement
+  </Card>
+  <Card
+    title="Improve Docs"
+    icon="pen"
+    href="https://github.com/elitemaks/mark2notion-docs/issues/new?labels=documentation"
+  >
+    Help make the documentation better
+  </Card>
+  <Card
+    title="General Discussion"
+    icon="chat"
+    href="https://github.com/elitemaks/mark2notion-docs/discussions"
+  >
+    Share ideas and discuss use cases
+  </Card>
+</CardGroup>
