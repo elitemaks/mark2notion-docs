@@ -52,12 +52,11 @@ To help us resolve issues quickly, please include:
 
 ### Example Bug Report
 
-```markdown
-**Describe the bug**
+**Describe the bug**  
 The append endpoint returns a 500 error when appending large markdown content (>5000 characters).
 
 **Request**
-```
+```http
 POST /api/append
 Headers: x-api-key: [REDACTED]
 Body: {
@@ -75,14 +74,13 @@ Body: {
 }
 ```
 
-**Expected Behavior**
+**Expected Behavior**  
 Content should be successfully appended to the Notion page.
 
 **Environment**
 - Language: JavaScript/Node.js
 - OS: macOS 14.1
 - Content size: ~6000 characters
-```
 
 ## Feature Requests
 

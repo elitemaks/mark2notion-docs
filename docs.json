@@ -1,46 +1,30 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
   "name": "Mark2Notion API",
+  "theme": "mint",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
   "colors": {
     "primary": "#0F172A",
     "light": "#1E293B",
     "dark": "#0F172A"
   },
-  "favicon": "/favicon.svg",
-  "navigation": [
-    {
-      "group": "Getting Started",
-      "pages": [
-        "index",
-        "quickstart",
-        "authentication"
-      ]
-    },
-    {
-      "group": "API Reference",
-      "pages": [
-        "api-reference/convert",
-        "api-reference/append"
-      ]
-    },
-    {
-      "group": "Support",
-      "pages": [
-        "errors",
-        "feedback"
-      ]
-    }
-  ],
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
+  "navigation": {
+    "groups": [
       {
-        "label": "Dashboard",
-        "href": "https://mark2notion.com/dashboard"
+        "group": "Getting Started",
+        "pages": ["index", "quickstart", "authentication"]
+      },
+      {
+        "group": "API Reference",
+        "pages": ["api-reference/convert", "api-reference/append"]
+      },
+      {
+        "group": "Support",
+        "pages": ["errors", "feedback"]
       }
     ]
   },
