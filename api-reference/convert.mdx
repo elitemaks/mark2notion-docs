@@ -10,6 +10,10 @@ The convert endpoint transforms Markdown text into Notion block objects that can
 
 ## Request
 
+<ParamField header="x-api-key" type="string" required>
+  Your Mark2Notion API key
+</ParamField>
+
 <ParamField body="markdown" type="string" required>
   The Markdown content to convert to Notion blocks
 </ParamField>
@@ -30,6 +34,162 @@ The convert endpoint transforms Markdown text into Notion block objects that can
     </ResponseField>
   </Expandable>
 </ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.mark2notion.com/api/convert" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "markdown": "# My Heading\n\nThis is a **bold** paragraph with a [link](https://example.com).\n\n- List item 1\n- List item 2"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.mark2notion.com/api/convert', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    markdown: `# My Heading
+
+This is a **bold** paragraph with a [link](https://example.com).
+
+- List item 1
+- List item 2`
+  })
+});
+
+const data = await response.json();
+console.log(data.data.blocks);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.mark2notion.com/api/convert',
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    },
+    json={
+        'markdown': '''# My Heading
+
+This is a **bold** paragraph with a [link](https://example.com).
+
+- List item 1
+- List item 2'''
+    }
+)
+
+data = response.json()
+print(data['data']['blocks'])
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Example Response
+{
+  "status": "success",
+  "data": {
+    "blocks": [
+      {
+        "type": "heading_1",
+        "heading_1": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "My Heading"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "This is a "
+              }
+            },
+            {
+              "type": "text",
+              "text": {
+                "content": "bold"
+              },
+              "annotations": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "text": {
+                "content": " paragraph with a "
+              }
+            },
+            {
+              "type": "text",
+              "text": {
+                "content": "link",
+                "link": {
+                  "url": "https://example.com"
+                }
+              }
+            },
+            {
+              "type": "text",
+              "text": {
+                "content": "."
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "bulleted_list_item",
+        "bulleted_list_item": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "List item 1"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "bulleted_list_item",
+        "bulleted_list_item": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "List item 2"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "blockCount": 4
+  }
+}
+```
+
+</ResponseExample>
 
 ## Error Responses
 

@@ -202,56 +202,19 @@ Before using the append endpoint, you need:
 
 ## Error Responses
 
-<ResponseExample>
-
-```json 400 - Validation Error
-{
-  "status": "fail",
-  "data": {
-    "notionToken": "Missing or invalid Notion token",
-    "pageId": "Invalid page ID format"
-  }
-}
-```
-
-```json 403 - Notion Access Error
-{
-  "status": "error",
-  "message": "Page not found or access denied"
-}
-```
-
-```json 401 - Invalid Notion Token
-{
-  "status": "error", 
-  "message": "Invalid Notion token or insufficient permissions"
-}
-```
-
-```json 429 - Rate Limited
-{
-  "status": "error",
-  "message": "Usage quota exceeded for current billing period",
-  "data": {
-    "current_usage": 1000,
-    "quota": 1000,
-    "plan": "free",
-    "requests_remaining": 0
-  }
-}
-```
-
-</ResponseExample>
+<Card
+  title="Handle Errors"
+  icon="triangle-exclamation"
+  href="/errors"
+>
+Understand error responses and how to handle them.
+</Card>
 
 ## Usage Notes
 
 <Info>
 The append endpoint counts as multiple API calls if your content requires multiple chunks. Check the `requestCount` in the response.
 </Info>
-
-<Tip>
-For better performance with large content, consider using the convert endpoint first to check the block count, then decide whether to use append or handle it in smaller pieces.
-</Tip>
 
 <Warning>
 Make sure your Notion integration has access to the target page. The integration must be explicitly shared with the page.
@@ -264,7 +227,3 @@ The append endpoint includes built-in idempotency protection:
 - Duplicate requests with the same content and parameters are automatically detected
 - Returns the original response for duplicate requests
 - Prevents accidental duplicate content on your pages
-
-<Note>
-Idempotency is based on the combination of API key, page ID, markdown content, and position parameters.
-</Note>
