@@ -45,12 +45,8 @@ Your API key is sensitive. Never include it in client-side code or commit it to 
 
 ## Usage Limits
 
-API usage is tracked and limited based on your subscription plan:
-
-| Plan | Monthly Requests | Rate Limit |
-|------|------------------|------------|
-| Free | 1,000 | 10 req/min |
-| Pro  | 50,000 | 100 req/min |
+API usage is tracked and limited based on your subscription plan.
+You can check usage in the [dashbard](https://dashboard.mark2notion.com)
 
 ### Rate Limiting
 
@@ -59,17 +55,6 @@ The API implements intelligent rate limiting:
 - **Respect Notion's limits**: 3 requests per second to Notion API
 - **Automatic retries**: Built-in exponential backoff for rate limits
 - **Usage tracking**: Real-time tracking of your quota usage
-
-### Usage Headers
-
-Each response includes usage information in headers:
-
-```http
-X-Usage-Current: 150
-X-Usage-Quota: 1000
-X-Usage-Remaining: 850
-X-Usage-Plan: free
-```
 
 ## Error Responses
 

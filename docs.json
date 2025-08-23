@@ -1,11 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "Mark2Notion API",
+  "name": "mark2notion API",
   "theme": "mint",
-  "logo": {
-    "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
-  },
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#0F172A",

@@ -10,10 +10,6 @@ The convert endpoint transforms Markdown text into Notion block objects that can
 
 ## Request
 
-<ParamField header="x-api-key" type="string" required>
-  Your Mark2Notion API key
-</ParamField>
-
 <ParamField body="markdown" type="string" required>
   The Markdown content to convert to Notion blocks
 </ParamField>
@@ -35,229 +31,15 @@ The convert endpoint transforms Markdown text into Notion block objects that can
   </Expandable>
 </ResponseField>
 
-## Examples
-
-<CodeGroup>
-
-```bash curl
-curl -X POST "https://api.mark2notion.com/api/convert" \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -d '{
-    "markdown": "# My Heading\n\nThis is a **bold** paragraph with a [link](https://example.com).\n\n- List item 1\n- List item 2"
-  }'
-```
-
-```javascript JavaScript
-const response = await fetch('https://api.mark2notion.com/api/convert', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': 'YOUR_API_KEY'
-  },
-  body: JSON.stringify({
-    markdown: `# My Heading
-
-This is a **bold** paragraph with a [link](https://example.com).
-
-- List item 1
-- List item 2`
-  })
-});
-
-const data = await response.json();
-console.log(data.data.blocks);
-```
-
-```python Python
-import requests
-
-response = requests.post(
-    'https://api.mark2notion.com/api/convert',
-    headers={
-        'Content-Type': 'application/json',
-        'x-api-key': 'YOUR_API_KEY'
-    },
-    json={
-        'markdown': '''# My Heading
-
-This is a **bold** paragraph with a [link](https://example.com).
-
-- List item 1
-- List item 2'''
-    }
-)
-
-data = response.json()
-print(data['data']['blocks'])
-```
-
-</CodeGroup>
-
-<ResponseExample>
-
-```json Example Response
-{
-  "status": "success",
-  "data": {
-    "blocks": [
-      {
-        "type": "heading_1",
-        "heading_1": {
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "My Heading"
-              }
-            }
-          ]
-        }
-      },
-      {
-        "type": "paragraph",
-        "paragraph": {
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "This is a "
-              }
-            },
-            {
-              "type": "text",
-              "text": {
-                "content": "bold"
-              },
-              "annotations": {
-                "bold": true
-              }
-            },
-            {
-              "type": "text",
-              "text": {
-                "content": " paragraph with a "
-              }
-            },
-            {
-              "type": "text",
-              "text": {
-                "content": "link",
-                "link": {
-                  "url": "https://example.com"
-                }
-              }
-            },
-            {
-              "type": "text",
-              "text": {
-                "content": "."
-              }
-            }
-          ]
-        }
-      },
-      {
-        "type": "bulleted_list_item",
-        "bulleted_list_item": {
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "List item 1"
-              }
-            }
-          ]
-        }
-      },
-      {
-        "type": "bulleted_list_item",
-        "bulleted_list_item": {
-          "rich_text": [
-            {
-              "type": "text",
-              "text": {
-                "content": "List item 2"
-              }
-            }
-          ]
-        }
-      }
-    ],
-    "blockCount": 4
-  }
-}
-```
-
-</ResponseExample>
-
-## Supported Markdown
-
-The convert endpoint supports all standard Markdown syntax:
-
-### Text Formatting
-- **Bold text** (`**bold**`)
-- *Italic text* (`*italic*`)
-- ~~Strikethrough~~ (`~~strikethrough~~`)
-- `Inline code` (`` `code` ``)
-
-### Headings
-- `# Heading 1`
-- `## Heading 2`
-- `### Heading 3`
-
-### Lists
-- Bulleted lists (`- item`)
-- Numbered lists (`1. item`)
-- Nested lists (indented)
-
-### Links and Media
-- [Links](https://example.com) (`[text](url)`)
-- Images (`![alt](url)`)
-
-### Code
-- Inline code (`` `code` ``)
-- Code blocks (``` ```language ```)
-
-### Other
-- Blockquotes (`> quote`)
-- Horizontal rules (`---`)
-- Tables (GitHub-flavored markdown)
-
 ## Error Responses
 
-<ResponseExample>
-
-```json 400 - Invalid Request
-{
-  "status": "fail",
-  "data": {
-    "markdown": "Missing or invalid markdown content"
-  }
-}
-```
-
-```json 401 - Authentication Error
-{
-  "status": "error",
-  "message": "Missing x-api-key"
-}
-```
-
-```json 429 - Rate Limited
-{
-  "status": "error",
-  "message": "Usage quota exceeded for current billing period",
-  "data": {
-    "current_usage": 1000,
-    "quota": 1000,
-    "plan": "free",
-    "requests_remaining": 0
-  }
-}
-```
-
-</ResponseExample>
+<Card
+  title="Handle Errors"
+  icon="triangle-exclamation"
+  href="/errors"
+>
+Understand error responses and how to handle them.
+</Card>
 
 ## Usage Notes
 
@@ -266,7 +48,7 @@ Each convert request counts as 1 API call against your quota, regardless of the 
 </Info>
 
 <Tip>
-The returned blocks are standard Notion API block objects and can be used directly with the Notion API or passed to our append endpoint.
+The returned blocks are standard Notion API block objects and can be used directly with the Notion API.
 </Tip>
 
 <Warning>
