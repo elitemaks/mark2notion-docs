@@ -212,5 +212,5 @@ The returned blocks are standard Notion API block objects and can be used direct
 </Tip>
 
 <Warning>
-Very large markdown documents may take longer to process. Consider chunking large content for better performance.
+The convert endpoint returns raw Notion blocks without additional processing. For content that will be sent to Notion, consider using the `/append` endpoint which includes smart processing for large content, text splitting, and validation.
 </Warning>
