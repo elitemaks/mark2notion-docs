@@ -6,7 +6,77 @@ description: "Convert Markdown text to Notion block objects"
 
 ## Overview
 
-The convert endpoint transforms Markdown text into Notion block objects that can be used with the Notion API or our append endpoint.
+The convert endpoint transforms Markdown text into Notion block objects that can be used with the Notion API or our append endpoint. Our converter supports a comprehensive set of Markdown features including GitHub Flavored Markdown (GFM) alerts, advanced formatting, and intelligent text splitting.
+
+## Supported Markdown Features
+
+### Basic Elements
+- **Headings**: `#`, `##`, `###`, `####`, `#####`, `######` (H4-H6 map to `heading_3`)
+- **Paragraphs**: Regular text and line breaks
+- **Text Formatting**: `**bold**`, `*italic*`, `` `code` ``, `~~strikethrough~~`
+- **Links**: `[text](url)` and `<https://example.com>` autolinks
+- **Images**: `![alt text](image-url)`
+
+### Lists
+- **Bulleted Lists**: `- item` or `* item` 
+- **Numbered Lists**: `1. item`
+- **Nested Lists**: Unlimited nesting depth supported
+- **Mixed Lists**: Combine bulleted and numbered at different levels
+
+### Code
+- **Inline Code**: `` `code` ``
+- **Code Blocks**: ` ```language` with syntax highlighting
+- **Indented Code**: 4+ space indentation
+
+### Advanced Features
+- **Tables**: Full Markdown table support with headers
+- **Blockquotes**: `> quoted text`
+- **GFM Alerts**: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`
+- **Horizontal Rules**: `---`, `***`, or `___`
+
+### Generated Notion Block Types
+
+| Markdown Element | Notion Block Type | Notes |
+|------------------|------------------|-------|
+| `# Heading` | `heading_1`, `heading_2`, `heading_3` | H4-H6 map to heading_3 |
+| `Text` | `paragraph` | With rich text formatting |
+| `- Item` | `bulleted_list_item` | Unlimited nesting |
+| `1. Item` | `numbered_list_item` | Unlimited nesting |
+| ` ```code``` ` | `code` | With language support |
+| `> Quote` | `quote` | Standard blockquotes |
+| `> [!NOTE]` | `callout` | With icons and colors |
+| `![alt](url)` | `image` | External images |
+| `\| Table \|` | `table` | With headers |
+| `---` | `divider` | Horizontal rules |
+
+## Text Length Handling
+
+### Automatic Text Splitting
+Content longer than 2000 characters is automatically split across multiple `rich_text` objects within the same block:
+
+- ✅ **No content loss**: All text is preserved
+- ✅ **Smart splitting**: Breaks at safe boundaries when possible  
+- ✅ **Maintains formatting**: Bold, italic, and other formatting preserved across splits
+- ✅ **Transparent**: The splitting is handled automatically
+
+### Example: Long Content
+```json
+{
+  "type": "paragraph",
+  "paragraph": {
+    "rich_text": [
+      {
+        "type": "text",
+        "text": { "content": "First 2000 characters of content..." }
+      },
+      {
+        "type": "text", 
+        "text": { "content": "...remaining characters continue here" }
+      }
+    ]
+  }
+}
+```
 
 ## Request
 
@@ -44,7 +114,7 @@ curl -X POST "https://api.mark2notion.com/api/convert" \
   -H "Content-Type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
   -d '{
-    "markdown": "# My Heading\n\nThis is a **bold** paragraph with a [link](https://example.com).\n\n- List item 1\n- List item 2"
+    "markdown": "# My Heading\n\nThis is a **bold** paragraph with a [link](https://example.com).\n\n> [!NOTE]\n> This is a GitHub-flavored alert that becomes a callout!\n\n- List item 1\n- List item 2\n\n---\n\n## Code Example\n\n```javascript\nconsole.log(\"Hello World!\");\n```"
   }'
 ```
 
@@ -60,8 +130,19 @@ const response = await fetch('https://api.mark2notion.com/api/convert', {
 
 This is a **bold** paragraph with a [link](https://example.com).
 
+> [!NOTE]
+> This is a GitHub-flavored alert that becomes a callout!
+
 - List item 1
-- List item 2`
+- List item 2
+
+---
+
+## Code Example
+
+\`\`\`javascript
+console.log("Hello World!");
+\`\`\``
   })
 });
 
@@ -83,8 +164,19 @@ response = requests.post(
 
 This is a **bold** paragraph with a [link](https://example.com).
 
+> [!NOTE]
+> This is a GitHub-flavored alert that becomes a callout!
+
 - List item 1
-- List item 2'''
+- List item 2
+
+---
+
+## Code Example
+
+```javascript
+console.log("Hello World!");
+```'''
     }
 )
 
