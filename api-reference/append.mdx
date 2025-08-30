@@ -42,13 +42,18 @@ The append endpoint converts Markdown text to Notion blocks and appends them dir
       Total number of blocks that were appended
     </ResponseField>
     <ResponseField name="requestCount" type="number">
-      Number of API requests made to Notion (used for usage tracking)
+      Number of internal Notion API requests made (for transparency - does NOT affect your usage quota)
     </ResponseField>
     <ResponseField name="retryCount" type="number">
       Number of retry attempts due to rate limiting
     </ResponseField>
     <ResponseField name="lastBlockId" type="string">
       ID of the last block that was created (useful for subsequent appends)
+    </ResponseField>
+    <ResponseField name="warnings" type="array">
+      Array of warning messages when content modifications are made:
+      - URL truncation notifications (when URLs exceed 2000 characters)
+      - Equation truncation notifications (when equations exceed 1000 characters)
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -120,7 +125,7 @@ print(f"Added {data['data']['totalBlocks']} blocks")
 
 <ResponseExample>
 
-```json Example Response
+```json Standard Response
 {
   "status": "success",
   "data": {
@@ -128,6 +133,47 @@ print(f"Added {data['data']['totalBlocks']} blocks")
     "requestCount": 1,
     "retryCount": 0,
     "lastBlockId": "f9e8d7c6-b5a4-3210-9876-543210fedcba"
+  }
+}
+```
+
+```json Standard Response (Large Content)
+{
+  "status": "success",
+  "data": {
+    "totalBlocks": 1247,
+    "requestCount": 3,
+    "retryCount": 1,
+    "lastBlockId": "f9e8d7c6-b5a4-3210-9876-543210fedcba"
+  }
+}
+```
+
+```json Response with Content Truncation
+{
+  "status": "success",
+  "data": {
+    "totalBlocks": 15,
+    "requestCount": 1,
+    "retryCount": 0,
+    "lastBlockId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "warnings": [
+      "Content truncated due to Notion API limits:",
+      "• 2 URLs truncated to 2000 characters",
+      "• 1 equation truncated to 1000 characters"
+    ]
+  }
+}
+```
+
+```json Response with Deep Nesting
+{
+  "status": "success", 
+  "data": {
+    "totalBlocks": 87,
+    "requestCount": 4,
+    "retryCount": 0,
+    "lastBlockId": "xyz789-abc123-def456-ghi789"
   }
 }
 ```
@@ -179,7 +225,7 @@ The append endpoint includes intelligent rate limiting:
 - **Respectful timing**: 400ms delay between requests to respect Notion's limits
 
 <Info>
-The `requestCount` in the response indicates how many Notion API calls were made, which affects your usage quota.
+Each append API call counts as **1 usage** regardless of complexity. The `requestCount` is provided for transparency but does NOT affect your quota.
 </Info>
 
 ## Notion Setup
@@ -213,7 +259,7 @@ Understand error responses and how to handle them.
 ## Usage Notes
 
 <Info>
-The append endpoint counts as multiple API calls if your content requires multiple chunks. Check the `requestCount` in the response.
+Every append request counts as **exactly 1 API call** in your usage quota, regardless of content size or complexity.
 </Info>
 
 <Warning>
@@ -227,3 +273,57 @@ The append endpoint includes built-in idempotency protection:
 - Duplicate requests with the same content and parameters are automatically detected
 - Returns the original response for duplicate requests
 - Prevents accidental duplicate content on your pages
+
+## Notion API Limits Handling
+
+Mark2Notion provides **comprehensive protection** against all Notion API limits with intelligent handling strategies:
+
+### ✅ **Fully Protected Limits**
+
+<AccordionGroup>
+  <Accordion title="Content Size Limits">
+    - **Rich Text**: 2000 characters per block (automatic text splitting)
+    - **URLs**: 2000 characters (truncated with warnings if exceeded)  
+    - **Equations**: 1000 characters (truncated with warnings if exceeded)
+    - **Email/Phone**: Handled as regular text content (no special limits)
+  </Accordion>
+
+  <Accordion title="Block Structure Limits">
+    - **Payload Size**: 500KB maximum per request (pre-validation with detailed errors)
+    - **Total Blocks**: 1000 blocks maximum (automatic splitting into manageable chunks)
+    - **Children Count**: 100 blocks per request (intelligent chunking)
+    - **Nesting Depth**: 2 levels maximum (deep nesting preserved via sub-request strategy)
+  </Accordion>
+
+  <Accordion title="Rate & Access Limits">
+    - **Request Rate**: 3 requests/second (exponential backoff + 400ms delays)
+    - **Integration Capabilities**: Proper error handling for access issues
+    - **Page Access**: Automatic verification before processing
+  </Accordion>
+</AccordionGroup>
+
+
+### 📊 **Advanced Capabilities**
+
+<CardGroup cols={2}>
+  <Card title="Deep Nesting Preservation" icon="sitemap">
+    Handles unlimited nesting depth (5, 6, 7+ levels) by breaking into sub-requests while maintaining parent-child relationships
+  </Card>
+  
+  <Card title="Large Document Support" icon="file-lines">
+    Automatically splits documents with 1000+ blocks into manageable chunks without losing content order
+  </Card>
+  
+  <Card title="Content Truncation Warnings" icon="triangle-exclamation">
+    Provides clear warnings when URLs or equations are truncated, so you know exactly what was modified
+  </Card>
+  
+  <Card title="Transparent Pricing" icon="eye">
+    Every append request counts as exactly 1 API call, regardless of internal complexity
+  </Card>
+</CardGroup>
+
+
+<Info>
+**Perfect Coverage**: Mark2Notion handles 100% of applicable Notion API limits automatically. You can send any markdown content without worrying about hitting Notion's restrictions.
+</Info>
