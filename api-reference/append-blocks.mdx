@@ -1,0 +1,208 @@
+---
+title: "Append Prebuilt Blocks"
+api: "POST https://api.mark2notion.com/api/append-blocks"
+description: "Append already-converted Notion blocks directly to a page"
+---
+
+## Overview
+
+Use the append-blocks endpoint when you already have an array of Notion block objects and simply need them inserted into a page. This endpoint skips Markdown conversion and feeds your blocks through the same intelligent planning, batching, and retry logic used by the Markdown append workflow.
+
+## Request
+
+<ParamField header="x-api-key" type="string" required>
+  Your Mark2Notion API key
+</ParamField>
+
+<ParamField body="blocks" type="array" required>
+  Array of Notion block objects you want to append. Each block must follow the structure expected by the Notion API, including nested `children` when needed.
+</ParamField>
+
+<ParamField body="notionToken" type="string" required>
+  Your Notion integration token (from notion.so/my-integrations)
+</ParamField>
+
+<ParamField body="pageId" type="string" required>
+  The ID of the Notion page to append content to
+</ParamField>
+
+<ParamField body="after" type="string">
+  Optional block ID to append content after. If omitted, blocks are appended to the end of the page.
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Will be "success" for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="data">
+    <ResponseField name="totalBlocks" type="number">
+      Total number of blocks that were appended
+    </ResponseField>
+    <ResponseField name="requestCount" type="number">
+      Number of internal Notion API requests made (for transparency - does NOT affect your usage quota)
+    </ResponseField>
+    <ResponseField name="retryCount" type="number">
+      Number of retry attempts caused by rate limiting
+    </ResponseField>
+    <ResponseField name="lastBlockId" type="string">
+      ID of the last block that was created (use this for subsequent `after` appends)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.mark2notion.com/api/append-blocks" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "blocks": [
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": { "content": "First paragraph from raw blocks" }
+            }
+          ]
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": { "content": "Second paragraph" }
+            }
+          ]
+        }
+      }
+    ],
+    "notionToken": "secret_NOTION_INTEGRATION_TOKEN",
+    "pageId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  }'
+```
+
+```javascript JavaScript
+const blocks = [
+  {
+    object: 'block',
+    type: 'paragraph',
+    paragraph: {
+      rich_text: [
+        {
+          type: 'text',
+          text: { content: 'First paragraph from raw blocks' }
+        }
+      ]
+    }
+  },
+  {
+    object: 'block',
+    type: 'paragraph',
+    paragraph: {
+      rich_text: [
+        {
+          type: 'text',
+          text: { content: 'Second paragraph' }
+        }
+      ]
+    }
+  }
+];
+
+const response = await fetch('https://api.mark2notion.com/api/append-blocks', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    blocks,
+    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
+    pageId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+  })
+});
+
+const data = await response.json();
+console.log(`Added ${data.data.totalBlocks} blocks`);
+```
+
+```python Python
+import requests
+
+blocks = [
+    {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+            "rich_text": [
+                {
+                    "type": "text",
+                    "text": {"content": "First paragraph from raw blocks"}
+                }
+            ]
+        }
+    }
+]
+
+response = requests.post(
+    'https://api.mark2notion.com/api/append-blocks',
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    },
+    json={
+        'blocks': blocks,
+        'notionToken': 'secret_NOTION_INTEGRATION_TOKEN',
+        'pageId': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+    }
+)
+
+data = response.json()
+print(f"Added {data['data']['totalBlocks']} blocks")
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Standard Response
+{
+  "status": "success",
+  "data": {
+    "totalBlocks": 2,
+    "requestCount": 1,
+    "retryCount": 0,
+    "lastBlockId": "f9e8d7c6-b5a4-3210-9876-543210fedcba"
+  }
+}
+```
+
+```json Validation Error
+{
+  "status": "fail",
+  "data": {
+    "blocks": "Blocks must be a non-empty array"
+  }
+}
+```
+
+</ResponseExample>
+
+## Usage Notes
+
+- Provide blocks exactly as expected by the Notion API. Complex structures (tables, synced blocks, nested children) are supported as long as the JSON matches Notion's schema.
+- The endpoint enforces non-empty arrays and idempotency, so repeated requests with the same blocks are safely deduplicated.
+- Use the `after` parameter together with the `lastBlockId` returned from previous calls to chain precise insertions.
+- If you need help generating blocks, use the [`/convert`](./convert) endpoint first and then pass the resulting array here.

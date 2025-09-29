@@ -8,6 +8,8 @@ description: "Convert Markdown and append it directly to a Notion page"
 
 The append endpoint converts Markdown text to Notion blocks and appends them directly to an existing Notion page. This combines the convert functionality with direct Notion integration.
 
+If you already have Notion block JSON (for example from a previous `/convert` call or another system), use the [`/append-blocks`](./append-blocks) endpoint to append without reconverting.
+
 ## Request
 
 <ParamField header="x-api-key" type="string" required>

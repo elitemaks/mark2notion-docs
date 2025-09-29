@@ -6,7 +6,7 @@ description: "Convert Markdown text to Notion block objects"
 
 ## Overview
 
-The convert endpoint transforms Markdown text into Notion block objects that can be used with the Notion API or our append endpoint. Our converter supports a comprehensive set of Markdown features including GitHub Flavored Markdown (GFM) alerts, advanced formatting, and intelligent text splitting.
+The convert endpoint transforms Markdown text into Notion block objects that can be used with the Notion API, our append endpoint, or the append-blocks endpoint when you need to append prebuilt blocks. Our converter supports a comprehensive set of Markdown features including GitHub Flavored Markdown (GFM) alerts, advanced formatting, and intelligent text splitting.
 
 ## Supported Markdown Features
 
@@ -304,5 +304,5 @@ The returned blocks are standard Notion API block objects and can be used direct
 </Tip>
 
 <Warning>
-The convert endpoint returns raw Notion blocks without additional processing. For content that will be sent to Notion, consider using the `/append` endpoint which includes smart processing for large content, text splitting, and validation.
+The convert endpoint returns raw Notion blocks without additional processing. For content that will be sent to Notion, consider using the `/append` endpoint for Markdown sources or `/append-blocks` when you already have block JSON. Both include smart processing for large payloads, text splitting, and validation.
 </Warning>

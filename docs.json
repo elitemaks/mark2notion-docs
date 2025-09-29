@@ -12,15 +12,26 @@
     "groups": [
       {
         "group": "Getting Started",
-        "pages": ["index", "quickstart", "authentication"]
+        "pages": [
+          "index",
+          "quickstart",
+          "authentication"
+        ]
       },
       {
         "group": "API Reference",
-        "pages": ["api-reference/convert", "api-reference/append"]
+        "pages": [
+          "api-reference/convert",
+          "api-reference/append",
+          "api-reference/append-blocks"
+        ]
       },
       {
         "group": "Support",
-        "pages": ["errors", "feedback"]
+        "pages": [
+          "errors",
+          "feedback"
+        ]
       }
     ]
   },
