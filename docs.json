@@ -23,7 +23,8 @@
         "pages": [
           "api-reference/convert",
           "api-reference/append",
-          "api-reference/append-blocks"
+          "api-reference/append-blocks",
+          "api-reference/notion-to-markdown"
         ]
       },
       {

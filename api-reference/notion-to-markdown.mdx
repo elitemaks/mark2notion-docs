@@ -1,0 +1,198 @@
+---
+title: "Notion to Markdown"
+api: "POST https://api.mark2notion.com/api/notion-to-markdown"
+description: "Convert Notion page content to Markdown format"
+---
+
+## Overview
+
+The notion-to-markdown endpoint retrieves content from a Notion page and converts it to Markdown format. This is useful for exporting Notion content, creating backups, or integrating Notion content with other Markdown-based systems.
+
+## Supported Block Types
+
+The converter supports a comprehensive set of Notion block types:
+
+### Text Blocks
+- **Paragraphs**: Standard text blocks
+- **Headings**: H1, H2, H3 (converted to `#`, `##`, `###`)
+- **Quotes**: Blockquote blocks
+- **Callouts**: Notion callouts (converted to GFM-style alerts when possible)
+- **Code Blocks**: With language syntax support
+
+### Lists
+- **Bulleted Lists**: Converted to `-` items
+- **Numbered Lists**: Converted to `1.` items
+- **To-do Lists**: Converted to `- [ ]` or `- [x]` checkboxes
+- **Nested Lists**: Full nesting support
+
+### Media & Embeds
+- **Images**: Converted to `![alt](url)` format
+- **External Images**: Both uploaded and external images supported
+
+### Advanced Blocks
+- **Tables**: Full table support with headers
+- **Dividers**: Converted to `---`
+- **Child Pages**: Referenced in the output
+- **Child Databases**: Referenced in the output
+
+## Request
+
+<ParamField header="x-api-key" type="string" required>
+  Your Mark2Notion API key
+</ParamField>
+
+<ParamField body="notionToken" type="string" required>
+  Your Notion integration token (starts with `secret_`)
+</ParamField>
+
+<ParamField body="pageId" type="string" required>
+  The ID of the Notion page to convert. Can be a 32-character ID or UUID format
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Will be "success" for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="data">
+    <ResponseField name="markdown" type="string">
+      The Markdown representation of the Notion page content
+    </ResponseField>
+    <ResponseField name="pageId" type="string">
+      The ID of the page that was converted
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.mark2notion.com/api/notion-to-markdown" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "notionToken": "secret_your_notion_token",
+    "pageId": "abc123def456"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.mark2notion.com/api/notion-to-markdown', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    notionToken: 'secret_your_notion_token',
+    pageId: 'abc123def456'
+  })
+});
+
+const data = await response.json();
+console.log(data.data.markdown);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.mark2notion.com/api/notion-to-markdown',
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    },
+    json={
+        'notionToken': 'secret_your_notion_token',
+        'pageId': 'abc123def456'
+    }
+)
+
+data = response.json()
+print(data['data']['markdown'])
+```
+
+</CodeGroup>
+
+<ResponseExample>
+
+```json Example Response
+{
+  "status": "success",
+  "data": {
+    "markdown": "# My Page Title\n\nThis is a paragraph with **bold** text and *italic* text.\n\n## Subheading\n\n- List item 1\n- List item 2\n  - Nested item\n\n---\n\n```javascript\nconsole.log('Code block');\n```\n\n> This is a quote block\n\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |",
+    "pageId": "abc123def456"
+  }
+}
+```
+
+</ResponseExample>
+
+## Error Responses
+
+<Card
+  title="Handle Errors"
+  icon="triangle-exclamation"
+  href="/errors"
+>
+Understand error responses and how to handle them.
+</Card>
+
+### Common Errors
+
+<AccordionGroup>
+  <Accordion title="Invalid Notion Token">
+    **Status Code**: 401 Unauthorized
+    
+    The Notion token provided is invalid or expired. Make sure you're using a valid integration token.
+  </Accordion>
+  
+  <Accordion title="Page Not Found">
+    **Status Code**: 404 Not Found
+    
+    The page ID doesn't exist or your integration doesn't have access to it. Verify the page ID and ensure the page is shared with your integration.
+  </Accordion>
+  
+  <Accordion title="Access Denied">
+    **Status Code**: 403 Forbidden
+    
+    Your Notion integration doesn't have permission to access this page. Share the page with your integration in Notion.
+  </Accordion>
+</AccordionGroup>
+
+## Usage Notes
+
+<Info>
+Each notion-to-markdown request counts as 1 API call against your quota, regardless of the page size.
+</Info>
+
+<Tip>
+The endpoint returns standard Markdown that's compatible with GitHub Flavored Markdown (GFM) and most Markdown processors.
+</Tip>
+
+<Warning>
+Make sure your Notion integration has been granted access to the page you want to convert. Pages must be explicitly shared with your integration.
+</Warning>
+
+## Setup Guide
+
+To use this endpoint, you need a Notion integration token:
+
+1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations)
+2. Click "New integration"
+3. Give it a name and select the workspace
+4. Copy the "Internal Integration Token" (starts with `secret_`)
+5. Share the pages you want to convert with this integration
+
+## Use Cases
+
+- **Content Backup**: Export Notion pages to Markdown for backup purposes
+- **Static Site Generation**: Convert Notion content to Markdown for static site generators
+- **Documentation Sync**: Keep documentation in Notion and export to Markdown-based systems
+- **Content Migration**: Move content from Notion to other platforms
+- **Version Control**: Track Notion content changes in Git using Markdown format
+
