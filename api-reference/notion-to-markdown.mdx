@@ -57,8 +57,16 @@ The converter supports a comprehensive set of Notion block types:
 
 <ResponseField name="data" type="object">
   <Expandable title="data">
-    <ResponseField name="markdown" type="string">
-      The Markdown representation of the Notion page content
+    <ResponseField name="markdown" type="object">
+      An object containing the Markdown representation of the page content
+      <Expandable title="markdown">
+        <ResponseField name="parent" type="string">
+          The Markdown content of the main/parent page
+        </ResponseField>
+        <ResponseField name="[childPageTitle]" type="string">
+          If the page has child pages, each child page will be included as a separate property with the child page title as the key and its Markdown content as the value
+        </ResponseField>
+      </Expandable>
     </ResponseField>
     <ResponseField name="pageId" type="string">
       The ID of the page that was converted
@@ -94,7 +102,9 @@ const response = await fetch('https://api.mark2notion.com/api/notion-to-markdown
 });
 
 const data = await response.json();
-console.log(data.data.markdown);
+console.log(data.data.markdown.parent); // Parent page content
+// If there are child pages, they'll be available as separate properties:
+// console.log(data.data.markdown['Child Page Name']);
 ```
 
 ```python Python
@@ -113,18 +123,36 @@ response = requests.post(
 )
 
 data = response.json()
-print(data['data']['markdown'])
+print(data['data']['markdown']['parent'])  # Parent page content
+# If there are child pages, they'll be available as separate keys:
+# print(data['data']['markdown']['Child Page Name'])
 ```
 
 </CodeGroup>
 
 <ResponseExample>
 
-```json Example Response
+```json Example Response (Simple Page)
 {
   "status": "success",
   "data": {
-    "markdown": "# My Page Title\n\nThis is a paragraph with **bold** text and *italic* text.\n\n## Subheading\n\n- List item 1\n- List item 2\n  - Nested item\n\n---\n\n```javascript\nconsole.log('Code block');\n```\n\n> This is a quote block\n\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |",
+    "markdown": {
+      "parent": "# My Page Title\n\nThis is a paragraph with **bold** text and *italic* text.\n\n## Subheading\n\n- List item 1\n- List item 2\n  - Nested item\n\n---\n\n```javascript\nconsole.log('Code block');\n```\n\n> This is a quote block\n\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |"
+    },
+    "pageId": "abc123def456"
+  }
+}
+```
+
+```json Example Response (Page with Child Pages)
+{
+  "status": "success",
+  "data": {
+    "markdown": {
+      "parent": "# Main Page\n\nThis is the parent page content.\n\n> 📘 Note\n> This is a callout\n",
+      "Child Page 1": "## Child Page Content\n\nThis is content from the first child page.\n",
+      "Another Child": "## Another Child Page\n\nContent from another child page.\n"
+    },
     "pageId": "abc123def456"
   }
 }
@@ -164,10 +192,22 @@ Understand error responses and how to handle them.
   </Accordion>
 </AccordionGroup>
 
+## Response Structure
+
+The `markdown` field in the response is an object that separates parent and child page content:
+
+- **`parent`**: Contains the main page's Markdown content
+- **`[Child Page Title]`**: If the page has child pages, each will be a separate property named after the child page title, containing that child's Markdown content
+
+This structure allows you to:
+- Access the main content via `data.markdown.parent`
+- Iterate over child pages if they exist
+- Maintain the hierarchy of your Notion page structure
+
 ## Usage Notes
 
 <Info>
-Each notion-to-markdown request counts as 1 API call against your quota, regardless of the page size.
+Each notion-to-markdown request counts as 1 API call against your quota, regardless of the page size or number of child pages.
 </Info>
 
 <Tip>
@@ -175,7 +215,7 @@ The endpoint returns standard Markdown that's compatible with GitHub Flavored Ma
 </Tip>
 
 <Warning>
-Make sure your Notion integration has been granted access to the page you want to convert. Pages must be explicitly shared with your integration.
+Make sure your Notion integration has been granted access to the page you want to convert. Pages must be explicitly shared with your integration. Child pages will only be included if your integration has access to them as well.
 </Warning>
 
 ## Setup Guide
