@@ -17,7 +17,7 @@ If you already have Notion block JSON (for example from a previous `/convert` ca
 </ParamField>
 
 <ParamField body="markdown" type="string" required>
-  The Markdown content to convert and append
+  The Markdown content to convert and append. The API accepts both actual newlines and escaped sequences (`\n`, `\r\n`, `\r`), so you can use either format based on your tooling.
 </ParamField>
 
 <ParamField body="notionToken" type="string" required>
