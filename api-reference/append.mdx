@@ -8,6 +8,13 @@ description: "Convert Markdown and append it directly to a Notion page"
 
 The append endpoint converts Markdown text to Notion blocks and appends them directly to an existing Notion page. This combines the convert functionality with direct Notion integration.
 
+**Full Markdown Support**: The append endpoint uses the same conversion engine as the `/api/convert` endpoint, which means it supports all markdown features including:
+- HTML colors: `<span style="color: red">colored text</span>`
+- GFM alerts (callouts): `> [!NOTE]`, `> [!WARNING]`, etc.
+- Nested lists with unlimited depth
+- Tables with headers
+- All standard formatting (bold, italic, code, strikethrough)
+
 If you already have Notion block JSON (for example from a previous `/convert` call or another system), use the [`/append-blocks`](./append-blocks) endpoint to append without reconverting.
 
 ## Request

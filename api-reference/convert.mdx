@@ -14,6 +14,7 @@ The convert endpoint transforms Markdown text into Notion block objects that can
 - **Headings**: `#`, `##`, `###`, `####`, `#####`, `######` (H4-H6 map to `heading_3`)
 - **Paragraphs**: Regular text and line breaks
 - **Text Formatting**: `**bold**`, `*italic*`, `` `code` ``, `~~strikethrough~~`
+- **Colors**: `<span style="color: red">colored text</span>` (supports 9 Notion colors)
 - **Links**: `[text](url)` and `<https://example.com>` autolinks
 - **Images**: `![alt text](image-url)`
 
@@ -33,6 +34,31 @@ The convert endpoint transforms Markdown text into Notion block objects that can
 - **Blockquotes**: `> quoted text`
 - **GFM Alerts**: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`
 - **Horizontal Rules**: `---`, `***`, or `___`
+
+### HTML Color Support
+
+Add colors to your text using standard HTML syntax:
+
+```markdown
+This is <span style="color: red">red text</span> and <span style="color: blue">blue text</span>.
+```
+
+**Supported Colors:**
+- `red`, `blue`, `green`, `yellow`, `orange`, `purple`, `pink`, `gray` (or `grey`), `brown`
+
+**Features:**
+- Works with all block types (headings, lists, quotes, etc.)
+- Can be combined with other formatting (bold, italic, etc.)
+- Unsupported colors are silently ignored
+
+**Examples:**
+```markdown
+# Heading with <span style="color: purple">purple text</span>
+
+Paragraph with **bold <span style="color: red">red</span>** text.
+
+- List item with <span style="color: green">green text</span>
+```
 
 ### Generated Notion Block Types
 
