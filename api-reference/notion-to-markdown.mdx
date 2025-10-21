@@ -35,6 +35,38 @@ The converter supports a comprehensive set of Notion block types:
 - **Child Pages**: Referenced in the output
 - **Child Databases**: Referenced in the output
 
+### Text Formatting & Colors
+
+All rich text formatting from Notion is preserved in the Markdown output:
+
+- **Bold**: Converted to `**bold**`
+- **Italic**: Converted to `*italic*`
+- **Code**: Converted to `` `code` ``
+- **Strikethrough**: Converted to `~~strikethrough~~`
+- **Links**: Converted to `[text](url)`
+- **Colors**: Converted to HTML `<span>` tags with inline styles
+
+**Color Support:**
+
+Notion text colors are converted to HTML spans with inline CSS styles. This allows the colors to be preserved when the Markdown is rendered in systems that support HTML.
+
+**Supported Colors:**
+- `red`, `blue`, `green`, `yellow`, `orange`, `purple`, `pink`, `gray`, `brown`
+
+**Example:**
+```markdown
+This is <span style="color: red">red text</span> and <span style="color: blue">blue text</span>.
+```
+
+**Features:**
+- Works with all block types (paragraphs, headings, lists, quotes, etc.)
+- Can be combined with other formatting (bold, italic, code, etc.)
+- Multiple colors can be used within a single block
+
+**Limitations:**
+- Background colors (e.g., `red_background`) are not currently supported
+- Colors are exported as HTML, which requires the Markdown renderer to support inline HTML
+
 ## Request
 
 <ParamField header="x-api-key" type="string" required>
