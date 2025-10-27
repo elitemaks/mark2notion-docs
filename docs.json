@@ -21,9 +21,11 @@
       {
         "group": "API Reference",
         "pages": [
+          "api-reference/introduction",
           "api-reference/convert",
           "api-reference/append",
           "api-reference/append-blocks",
+          "api-reference/clear-page",
           "api-reference/notion-to-markdown"
         ]
       },

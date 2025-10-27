@@ -1,0 +1,300 @@
+---
+title: "Clear Notion Page"
+api: "POST https://api.mark2notion.com/api/clear-page"
+description: "Archive all top-level blocks from a Notion page"
+---
+
+## Overview
+
+The clear-page endpoint archives all top-level content blocks from a Notion page, effectively clearing it. This is useful for:
+- Resetting a page before adding new content
+- Cleaning up test or temporary pages
+- Automating page content replacement workflows
+
+**Important Notes**:
+- Uses Notion's archive functionality (blocks can be recovered from trash)
+- Only deletes top-level blocks; child blocks are automatically archived with their parents
+- Does NOT delete the page itself, only its content
+- Preserves page properties and title
+
+## Request
+
+<ParamField header="x-api-key" type="string" required>
+  Your Mark2Notion API key
+</ParamField>
+
+<ParamField body="notionToken" type="string" required>
+  Your Notion integration token (from notion.so/my-integrations)
+</ParamField>
+
+<ParamField body="pageId" type="string" required>
+  The ID of the Notion page to clear
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Will be "success" for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="data">
+    <ResponseField name="blocksDeleted" type="number">
+      Total number of top-level blocks that were archived
+    </ResponseField>
+    <ResponseField name="retryCount" type="number">
+      Number of retry attempts due to rate limiting or transient errors
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<CodeGroup>
+
+```bash curl
+curl -X POST "https://api.mark2notion.com/api/clear-page" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -d '{
+    "notionToken": "secret_NOTION_INTEGRATION_TOKEN",
+    "pageId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.mark2notion.com/api/clear-page', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
+    pageId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+  })
+});
+
+const data = await response.json();
+console.log(`Cleared ${data.data.blocksDeleted} blocks`);
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.mark2notion.com/api/clear-page',
+    headers={
+        'Content-Type': 'application/json',
+        'x-api-key': 'YOUR_API_KEY'
+    },
+    json={
+        'notionToken': 'secret_NOTION_INTEGRATION_TOKEN',
+        'pageId': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+    }
+)
+
+data = response.json()
+print(f"Cleared {data['data']['blocksDeleted']} blocks")
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    payload := map[string]string{
+        "notionToken": "secret_NOTION_INTEGRATION_TOKEN",
+        "pageId":      "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    }
+
+    jsonData, _ := json.Marshal(payload)
+    
+    req, _ := http.NewRequest(
+        "POST",
+        "https://api.mark2notion.com/api/clear-page",
+        bytes.NewBuffer(jsonData),
+    )
+    
+    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("x-api-key", "YOUR_API_KEY")
+    
+    client := &http.Client{}
+    resp, _ := client.Do(req)
+    defer resp.Body.Close()
+    
+    var result map[string]interface{}
+    json.NewDecoder(resp.Body).Decode(&result)
+    
+    data := result["data"].(map[string]interface{})
+    fmt.Printf("Cleared %.0f blocks\n", data["blocksDeleted"])
+}
+```
+
+</CodeGroup>
+
+## Response Example
+
+```json
+{
+  "status": "success",
+  "data": {
+    "blocksDeleted": 42,
+    "retryCount": 0
+  }
+}
+```
+
+## Common Use Cases
+
+### Clear and Replace Page Content
+
+Combine with the `/append` endpoint to replace page content:
+
+```javascript
+// 1. Clear existing content
+await fetch('https://api.mark2notion.com/api/clear-page', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
+    pageId: 'your-page-id'
+  })
+});
+
+// 2. Add new content
+await fetch('https://api.mark2notion.com/api/append', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'YOUR_API_KEY'
+  },
+  body: JSON.stringify({
+    markdown: '# Fresh Content\n\nThis replaces everything.',
+    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
+    pageId: 'your-page-id'
+  })
+});
+```
+
+### Automated Report Generation
+
+Clear and regenerate daily reports:
+
+```python
+import requests
+from datetime import datetime
+
+# Clear yesterday's report
+requests.post(
+    'https://api.mark2notion.com/api/clear-page',
+    headers={'x-api-key': 'YOUR_API_KEY'},
+    json={
+        'notionToken': 'secret_TOKEN',
+        'pageId': 'report-page-id'
+    }
+)
+
+# Generate today's report
+report_markdown = f"# Daily Report - {datetime.now().strftime('%Y-%m-%d')}\n\n..."
+requests.post(
+    'https://api.mark2notion.com/api/append',
+    headers={'x-api-key': 'YOUR_API_KEY'},
+    json={
+        'markdown': report_markdown,
+        'notionToken': 'secret_TOKEN',
+        'pageId': 'report-page-id'
+    }
+)
+```
+
+## Error Handling
+
+The endpoint follows standard error responses. See the [Errors](/errors) page for details.
+
+### Common Errors
+
+<ResponseField name="400" type="Validation Error">
+  Missing or invalid `notionToken` or `pageId` parameters
+</ResponseField>
+
+<ResponseField name="401" type="Unauthorized">
+  Invalid Notion token or no access to the specified page
+</ResponseField>
+
+<ResponseField name="403" type="Forbidden">
+  Invalid API key
+</ResponseField>
+
+<ResponseField name="404" type="Not Found">
+  Page does not exist or has been deleted
+</ResponseField>
+
+<ResponseField name="429" type="Rate Limited">
+  Too many requests. The endpoint includes automatic retry logic, but you may still hit limits with very high request volumes.
+</ResponseField>
+
+## Usage & Pricing
+
+Each successful clear-page request counts as **1 API usage** regardless of how many blocks are deleted.
+
+- Empty pages (0 blocks): Still counts as 1 usage
+- Pages with many blocks: Still counts as 1 usage
+- Failed requests: Do not count towards usage
+
+<Note>
+  **Pro Tip**: Since clearing a page costs 1 credit regardless of size, it's efficient for pages with lots of content. Use this when you need a clean slate!
+</Note>
+
+## Idempotency
+
+The clear-page endpoint implements idempotency to prevent duplicate operations:
+
+- Concurrent identical requests return `202 Accepted` with "in_progress" status
+- Once completed, subsequent clear requests are processed normally
+- Each request is tracked based on API key, page ID, and Notion token
+
+## Performance
+
+- **Average response time**: 2-5 seconds for typical pages
+- **Large pages** (100+ blocks): Up to 10-15 seconds
+- The endpoint processes blocks sequentially with built-in rate limit handling
+- Automatic retries ensure reliability even during Notion API throttling
+
+## Integration Examples
+
+### n8n Workflow
+
+Create a workflow node that clears a page before updating:
+
+1. HTTP Request node → `POST /api/clear-page`
+2. Wait 2 seconds (optional, for safety)
+3. HTTP Request node → `POST /api/append` with new content
+
+### Make (Integromat)
+
+Add a "Clear Page" action:
+1. HTTP module → Make a request
+2. Method: POST
+3. URL: `https://api.mark2notion.com/api/clear-page`
+4. Headers: `x-api-key` with your API key
+5. Body: JSON with `notionToken` and `pageId`
+
+### Zapier
+
+Use the Webhooks by Zapier action:
+1. Choose "POST" method
+2. URL: `https://api.mark2notion.com/api/clear-page`
+3. Add header: `x-api-key`
+4. Payload Type: JSON
+5. Add data: `notionToken` and `pageId`
+

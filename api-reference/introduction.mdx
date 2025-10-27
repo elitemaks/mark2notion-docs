@@ -1,33 +1,136 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: 'API Reference'
+description: 'Complete reference for all Mark2Notion API endpoints'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Available Endpoints
 
-## Welcome
+Mark2Notion provides a simple REST API for converting Markdown to Notion blocks and managing Notion page content.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+### Content Creation & Management
+
+<CardGroup cols={2}>
+  <Card
+    title="Convert"
+    icon="code"
+    href="/api-reference/convert"
+  >
+    Convert Markdown text to Notion block JSON without touching Notion
+  </Card>
+  <Card
+    title="Append"
+    icon="plus"
+    href="/api-reference/append"
+  >
+    Convert Markdown and append it directly to a Notion page
+  </Card>
+  <Card
+    title="Append Blocks"
+    icon="layer-group"
+    href="/api-reference/append-blocks"
+  >
+    Append pre-converted Notion blocks to a page
+  </Card>
+  <Card
+    title="Clear Page"
+    icon="eraser"
+    href="/api-reference/clear-page"
+  >
+    Archive all content blocks from a Notion page
+  </Card>
+</CardGroup>
+
+### Content Extraction
 
 <Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
+  title="Notion to Markdown"
+  icon="download"
+  href="/api-reference/notion-to-markdown"
 >
-  View the OpenAPI specification file
+  Extract content from a Notion page and convert it to Markdown
 </Card>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API endpoints require authentication using an API key passed in the `x-api-key` header:
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+```bash
+curl -X POST "https://api.mark2notion.com/api/convert" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"markdown": "# Hello World"}'
 ```
+
+Get your API key from the [Mark2Notion dashboard](https://mark2notion.com).
+
+## Common Workflows
+
+### Replace Page Content
+
+Clear and update a page in one workflow:
+
+```javascript
+// 1. Clear existing content
+await fetch('https://api.mark2notion.com/api/clear-page', {
+  method: 'POST',
+  headers: { 'x-api-key': 'YOUR_KEY' },
+  body: JSON.stringify({
+    notionToken: 'secret_TOKEN',
+    pageId: 'your-page-id'
+  })
+});
+
+// 2. Add fresh content
+await fetch('https://api.mark2notion.com/api/append', {
+  method: 'POST',
+  headers: { 'x-api-key': 'YOUR_KEY' },
+  body: JSON.stringify({
+    markdown: '# New Content',
+    notionToken: 'secret_TOKEN',
+    pageId: 'your-page-id'
+  })
+});
+```
+
+### Convert Once, Append Multiple Times
+
+Optimize by converting once and appending to multiple pages:
+
+```javascript
+// 1. Convert Markdown to blocks
+const convertRes = await fetch('https://api.mark2notion.com/api/convert', {
+  method: 'POST',
+  headers: { 'x-api-key': 'YOUR_KEY' },
+  body: JSON.stringify({ markdown: '# Report\n\nData here...' })
+});
+const { blocks } = (await convertRes.json()).data;
+
+// 2. Append to multiple pages
+for (const pageId of ['page1', 'page2', 'page3']) {
+  await fetch('https://api.mark2notion.com/api/append-blocks', {
+    method: 'POST',
+    headers: { 'x-api-key': 'YOUR_KEY' },
+    body: JSON.stringify({
+      blocks,
+      notionToken: 'secret_TOKEN',
+      pageId
+    })
+  });
+}
+```
+
+## Rate Limits
+
+All endpoints include automatic retry logic and respect Notion's rate limits. The API handles:
+
+- Rate limit responses (429)
+- Transient network errors
+- Notion API throttling
+
+You don't need to implement retry logic in your code - it's handled automatically.
+
+## Need Help?
+
+- **Issues & Bugs**: [GitHub Issues](https://github.com/elitemaks/mark2notion-api/issues)
+- **Errors**: See the [Errors](/errors) page for common error codes
+- **Feedback**: Share your experience on the [Feedback](/feedback) page
