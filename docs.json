@@ -53,5 +53,10 @@
     "socials": {
       "github": "https://github.com/elitemaks/mark2notion-api"
     }
+  },
+  "seo": {
+    "metatags": {
+        "canonical": "https://docs.mark2notion.com"
+    }
   }
 }
