@@ -1,0 +1,636 @@
+---
+title: 'Troubleshooting'
+description: 'Common issues and solutions for Mark2Notion API'
+---
+
+This guide covers the most common issues users encounter when using the Mark2Notion API. Each section includes the error message, what causes it, and how to fix it.
+
+## Table Conversion Issues
+
+### Table Cell Count Mismatch
+
+<Accordion title="Error: Number of cells in table row must match the table width of the parent table" defaultOpen>
+
+**Error Message**:
+```
+Content creation Failed. Fix the following:
+Number of cells in table row must match the table width of the parent table
+```
+
+**What This Means**:
+Your markdown table has rows with inconsistent numbers of columns. Notion requires all rows in a table to have the same number of cells.
+
+**Common Causes**:
+- Missing pipe separators (`|`) in markdown table rows
+- Extra or missing cells in some rows
+- Malformed table syntax with inconsistent column counts
+- Copy-pasted tables from other sources with formatting issues
+
+**Solutions**:
+
+1. **Check your markdown table syntax**:
+```markdown
+<!-- ❌ Bad: Inconsistent columns -->
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| A        | B        | C        |
+| D        | E        |          <!-- Missing cell -->
+| F        | G        | H        | I | <!-- Extra cell -->
+
+<!-- ✅ Good: All rows have 3 columns -->
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| A        | B        | C        |
+| D        | E        | F        |
+| G        | H        | I        |
+```
+
+2. **Validate your table before sending**:
+   - Count the number of `|` separators in each row
+   - Ensure header, separator, and all data rows have the same column count
+   - Use a markdown editor with table validation
+
+3. **Handle empty cells properly**:
+```markdown
+<!-- Empty cells must still be included -->
+| Name     | Email            | Phone |
+|----------|------------------|-------|
+| John     | john@example.com | 555-1234 |
+| Jane     | jane@example.com |       |  <!-- Empty cell, but separator present -->
+```
+
+<Tip>
+**Working with AI-generated content?** If you're using AI tools (like ChatGPT, Claude, or other LLMs) to generate markdown, add this instruction to your prompt:
+
+"Ensure all markdown tables are properly formatted with an equal number of columns in each row."
+
+This helps prevent table formatting errors before they reach the API.
+</Tip>
+
+</Accordion>
+
+## Page and Block Access Issues
+
+### Invalid Page ID Format
+
+<Accordion title="Error: page_id should be a valid uuid">
+
+**Error Message**:
+```
+path failed validation: path.page_id should be a valid uuid,
+instead was "1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
+```
+
+**What This Means**:
+The page ID you provided is not in the correct UUID format. Notion page IDs must be properly formatted UUIDs with hyphens.
+
+**Common Causes**:
+- Copying page ID from URL without hyphens
+- Using the page title or slug instead of ID
+- Including quotes or extra characters around the ID
+- Passing `"null"` or `"<string>"` as the page ID
+
+**Solutions**:
+
+1. **Get the correct page ID from the URL**:
+```
+https://notion.so/My-Page-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              This is the page ID (32 chars, no hyphens)
+```
+
+2. **Format it correctly with hyphens**:
+   - Notion page IDs must follow UUID format: `8-4-4-4-12` characters separated by hyphens
+   - Example: `1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p`
+   - You can use online UUID formatters or Notion's "Copy link" feature to get the properly formatted ID
+
+3. **Don't use these as page IDs**:
+   - ❌ Page titles: `"My-Multi-Category-Document"`
+   - ❌ Literal strings: `"null"`, `"<string>"`
+   - ❌ URLs: `"https://notion.so/..."`
+
+</Accordion>
+
+### Page or Block Not Found
+
+<Accordion title="Error: Could not find page with ID">
+
+**Error Message**:
+```
+Could not find page with ID: 12345678-1234-1234-1234-123456789abc.
+Make sure the relevant pages and databases are shared with your integration.
+```
+
+**What This Means**:
+Your Notion integration doesn't have access to the page, or the page doesn't exist.
+
+**Common Causes**:
+- Page not shared with your integration
+- Page was deleted or moved
+- Using an old/expired page ID
+- Wrong workspace (integration in different workspace than page)
+- Page is in a private database
+
+**Solutions**:
+
+1. **Share the page with your integration**:
+   - Open your target Notion page
+   - Click the three dots (•••) in the top right corner
+   - Select "Connections" → "Add connection"
+   - Find and select your integration from the list
+
+2. **Verify the page exists**:
+   - Try opening the page URL in your browser
+   - Check if the page was recently deleted or archived
+   - Confirm you're in the correct workspace
+
+3. **Check integration permissions**:
+   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
+   - Find your integration
+   - Verify it has "Content" capabilities
+   - Check which workspaces it's installed in
+
+4. **For pages in databases**:
+   - Share the entire database with your integration
+   - Individual pages inherit database permissions
+
+<Tip>
+If you just shared a page with your integration, wait a few seconds before making API requests. Notion may need a moment to propagate permissions.
+</Tip>
+
+</Accordion>
+
+### Block ID Used Instead of Page ID
+
+<Accordion title="Error: Provided ID is a block, not a page">
+
+**Error Message**:
+```
+Provided ID abcd1234-5678-90ef-abcd-ef1234567890 is a block, not a page.
+Use the retrieve block API instead
+```
+
+**What This Means**:
+You're trying to use a block ID in the `pageId` parameter. All endpoints require a page ID, not a block ID.
+
+**Solutions**:
+
+1. **Use the parent page ID**:
+   - Get the ID of the page that contains the block
+   - The page ID is in the URL when you open the page
+   - Use this page ID in the `pageId` parameter
+
+2. **Want to insert after a specific block?**
+   - Use the page ID in the `pageId` parameter
+   - Pass the block ID in the `after` parameter
+
+   Example:
+   ```json
+   {
+     "pageId": "12345678-1234-1234-1234-123456789abc",
+     "after": "abcd1234-5678-90ef-abcd-ef1234567890",
+     "markdown": "# Your content",
+     "notionToken": "secret_xxx"
+   }
+   ```
+
+3. **Identify the difference**:
+```javascript
+// Page URL - use this ID for pageId parameter
+https://notion.so/My-Page-abcd12345678901234567890abcdef123456
+
+// Block URL (notice the #) - use page ID for pageId, block ID for "after"
+https://notion.so/My-Page-abcd12345678901234567890abcdef123456#block123...
+```
+
+</Accordion>
+
+### Database ID Used Instead of Page ID
+
+<Accordion title="Error: Provided ID is a database, not a page">
+
+**Error Message**:
+```
+Provided ID aaaa1111-2222-3333-4444-bbbbccccdddd is a database, not a page.
+Use the retrieve database API instead.
+```
+
+**What This Means**:
+You're trying to add content directly to a database. You need to create or update pages within the database instead.
+
+**Solutions**:
+
+1. **Create a page in the database first**:
+   - You cannot append content directly to a database
+   - Create a new page in the database, then append to that page
+   - Or get the ID of an existing page in the database
+
+2. **Get a page ID from the database**:
+   - Open a page within the database
+   - Copy that page's ID from the URL
+   - Use that page ID for your API request
+
+</Accordion>
+
+### Archived Block Access
+
+<Accordion title="Error: Can't edit block that is archived">
+
+**Error Message**:
+```
+Can't edit block that is archived. You must unarchive the block before editing.
+```
+
+**What This Means**:
+The page or block you're trying to modify has been archived in Notion.
+
+**Solutions**:
+
+1. **Unarchive the page/block**:
+   - Open the page in Notion
+   - Click "Restore"
+
+2. **Check page status before editing**:
+   - Verify the page is not in the trash
+   - Ensure the parent page/database is not archived
+
+</Accordion>
+
+## Notion API Limitations
+
+<Note>
+**Good News:** The Mark2Notion API now automatically handles all Notion API content limitations. The errors listed below should no longer occur, as our system automatically splits or truncates content to meet Notion's requirements.
+
+If you encounter any of these errors, please [contact support](mailto:hello@mark2notion.com).
+</Note>
+
+### Rich Text Length Exceeded
+
+<Accordion title="Error: rich_text.length should be ≤ 100">
+
+**Error Message**:
+```
+body failed validation: body.children[0].paragraph.rich_text.length should be ≤ 100,
+instead was 107
+```
+
+**Status**: **This issue is now automatically handled by the API**
+
+**What This Means**:
+Notion limits rich text arrays to 100 elements per block. Blocks exceeding this limit are automatically split into multiple blocks.
+
+<Note>
+This issue has been fixed. If you're still seeing this error, please contact support at hello@mark2notion.com.
+</Note>
+
+</Accordion>
+
+### Text Content Length Exceeded
+
+<Accordion title="Error: text.content.length should be ≤ 2000">
+
+**Error Message**:
+```
+body failed validation: body.children[0].paragraph.rich_text[0].text.content.length
+should be ≤ 2000, instead was 8039
+```
+
+**What This Means**:
+Individual text segments in Notion cannot exceed 2,000 characters.
+
+<Note>
+**This issue was fixed.** The API now automatically handles text splitting.
+
+If you're still seeing this error, it may indicate an issue with your Notion integration token. Please contact support.
+</Note>
+
+</Accordion>
+
+## Request Validation Errors
+
+### Missing Required Fields
+
+<Accordion title="Error: Field is required">
+
+**Error Messages**:
+```json
+{"markdown": "Markdown is required"}
+{"pageId": "Page ID is required"}
+{"notionToken": "Notion token is required"}
+{"blocks": "Blocks must be a non-empty array"}
+```
+
+**What This Means**:
+Your request is missing required parameters.
+
+**Solutions**:
+
+1. **Check required fields per endpoint**:
+   - [/api/convert](/api-reference/convert)
+   - [/api/append](/api-reference/append)
+   - [/api/append-blocks](/api-reference/append-blocks)
+   - [/api/clear-page](/api-reference/clear-page)
+   - [/api/notion-to-markdown](/api-reference/notion-to-markdown)
+
+2. **Common mistakes**:
+   - ❌ Sending empty strings: `markdown: ""`
+   - ❌ Wrong data types: `pageId: 123` (should be string)
+   - ❌ Empty arrays: `blocks: []`
+   - ❌ Undefined/null values: `notionToken: null`
+
+</Accordion>
+
+### Empty or Invalid Markdown
+
+<Accordion title="Error: Markdown cannot be empty / No blocks generated">
+
+**Error Messages**:
+```json
+{"markdown": "Markdown cannot be empty"}
+{"markdown": "No blocks generated from markdown"}
+```
+
+**What This Means**:
+Your markdown content is empty or doesn't contain any valid content that can be converted to Notion blocks.
+
+**Solutions**:
+
+1. **Ensure non-empty content**:
+   - Markdown must contain actual text content, not just whitespace or newlines
+   - Check that your markdown string is not empty before sending
+
+2. **Common invalid content**:
+   - ❌ Empty strings: `""`
+   - ❌ Only whitespace: `"   "`
+   - ❌ Only newlines: `"\n\n\n"`
+   - ✅ Valid: `"# Hello World"` or any text with letters/numbers
+
+3. **Validate before sending**:
+   - Trim whitespace and check if the result has actual content
+   - Ensure the markdown contains at least some alphanumeric characters
+
+</Accordion>
+
+### Invalid JSON in Request
+
+<Accordion title="Error: Invalid JSON / Malformed JSON">
+
+**Error Messages**:
+```
+Invalid JSON
+Failed to parse request JSON. Bad control character in string literal...
+Expected double-quoted property name in JSON at position X
+Unexpected token 'm', "markdown=%"... is not valid JSON
+```
+
+**What This Means**:
+Your request body contains malformed JSON that cannot be parsed.
+
+**Common Causes**:
+- Unescaped special characters in strings (newlines, quotes, backslashes)
+- Form-encoded data instead of JSON
+- Syntax errors (missing commas, brackets, quotes)
+- Incorrect Content-Type header
+
+**Solutions**:
+
+1. **Use proper JSON encoding**:
+```javascript
+// ✅ Good: Properly escaped
+const body = JSON.stringify({
+  markdown: "Line 1\nLine 2\n\"Quoted\"",
+  pageId: "2c785200-4c6e-8182-ab77-dbbadb4daed6"
+});
+
+// ❌ Bad: Literal newlines and quotes
+const body = '{
+  "markdown": "Line 1
+  Line 2
+  "Quoted"",
+  "pageId": "xxx"
+}';
+```
+
+2. **Set correct Content-Type header**:
+```javascript
+fetch('/api/append', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',  // Important!
+    'x-api-key': 'your-api-key'
+  },
+  body: JSON.stringify({
+    markdown: content,
+    pageId: pageId,
+    notionToken: token
+  })
+});
+```
+
+3. **Don't use form encoding**:
+```javascript
+// ❌ Bad: Form-encoded
+const body = 'markdown=' + encodeURIComponent(content);
+
+// ✅ Good: JSON
+const body = JSON.stringify({ markdown: content });
+```
+
+4. **Escape special characters**:
+```javascript
+// All special characters are automatically escaped by JSON.stringify
+const markdown = `Content with "quotes", newlines\n, and \\ backslashes`;
+const body = JSON.stringify({ markdown }); // Handles escaping
+```
+
+</Accordion>
+
+## Authentication Issues
+
+### Invalid API Token
+
+<Accordion title="Error: API token is invalid">
+
+**Error Message**:
+```
+API token is invalid.
+```
+
+**What This Means**:
+The Notion integration token you provided is invalid or has been revoked.
+
+**Solutions**:
+
+1. **Verify your token**:
+   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
+   - Find your integration
+   - Check if it's active (not deleted)
+   - Regenerate a new secret if needed
+
+2. **Check token format**:
+   - Notion tokens start with `ntn_`
+   - Should be a long alphanumeric string
+   - No extra spaces or quotes
+
+3. **Common mistakes**:
+   - Using an old/expired token
+   - Copy-pasting with extra spaces
+   - Using a different workspace's token
+
+</Accordion>
+
+### Missing API Key
+
+<Accordion title="Error: Missing x-api-key header">
+
+For authentication issues with the Mark2Notion API key (not Notion token), see the [Error Handling](/errors#authentication-issues) page.
+
+</Accordion>
+
+## Rate Limiting and Usage
+
+### Quota Exceeded
+
+<Accordion title="Error: Usage quota exceeded">
+
+**Error Message**:
+```
+Usage quota exceeded for current billing period
+```
+
+**What This Means**:
+You've reached your monthly API request limit for your current plan.
+
+**Solutions**:
+
+1. **Check your usage**:
+   - Monitor your usage in the dashboard
+
+2. **Wait for reset**:
+   - Free tier quotas reset monthly
+   - Check when your next billing period starts
+
+3. **Upgrade your plan**:
+   - Visit the dashboard to upgrade to a higher tier
+   - Higher tiers offer more requests per month
+
+See [Error Handling - Rate Limits](/errors#usage-limits) for more details.
+
+</Accordion>
+
+### Usage Counter Not Found
+
+<Accordion title="Error: No usage counter found for current period">
+
+**Error Message**:
+```
+No usage counter found for current period
+```
+
+**What This Means**:
+This is an internal error related to usage tracking initialization.
+
+**Solutions**:
+
+1. **Retry the request**:
+   - This is usually a transient error
+   - Wait a few seconds and try again
+
+2. **If it persists**:
+   - Contact support through the [feedback page](/feedback)
+
+</Accordion>
+
+## Notion-Specific Errors
+
+### Conflict on Save
+
+<Accordion title="Error: Conflict occurred while saving">
+
+**Error Message**:
+```
+Conflict occurred while saving. Please try again.
+```
+
+**What This Means**:
+The page was modified by another user or process while your request was being processed.
+
+**Solutions**:
+
+1. **Retry the request**:
+   - This is usually a transient error
+   - Wait a few seconds and try again
+   - Use exponential backoff (wait longer between each retry)
+
+2. **Avoid concurrent edits**:
+   - Don't make multiple simultaneous requests to the same page
+   - Implement request queuing for frequent updates
+
+</Accordion>
+
+### Notion API Timeout
+
+<Accordion title="Error: Request to Notion API has timed out">
+
+**Error Message**:
+```
+Request to Notion API has timed out
+```
+
+**What This Means**:
+The request to Notion's API took too long and timed out.
+
+**Common Causes**:
+- Very large content being processed
+- Notion API experiencing slowdowns
+- Complex markdown with many blocks
+
+**Solutions**:
+
+1. **Retry the request**:
+   - Notion may be experiencing temporary issues
+   - Wait a few seconds before retrying
+
+2. **Break up large requests**:
+   - If sending very large content, split it into smaller chunks
+   - Send chunks separately with small delays between requests
+   - This prevents timeouts and improves reliability
+
+3. **Monitor Notion status**:
+   - Check [Notion's status page](https://status.notion.so/)
+   - If Notion is down, wait for recovery
+
+</Accordion>
+
+## Still Having Issues?
+
+If you're experiencing an error not covered here:
+
+<CardGroup cols={2}>
+  <Card
+    title="Report an Issue"
+    icon="bug"
+    href="https://github.com/elitemaks/mark2notion-api/issues"
+  >
+    Report bugs or unexpected errors on GitHub
+  </Card>
+  <Card
+    title="Contact Support"
+    icon="envelope"
+    href="mailto:hello@mark2notion.com"
+  >
+    Get help from our support team
+  </Card>
+</CardGroup>
+
+<Tip>
+When reporting issues, include:
+- The full error message
+- The endpoint you're calling
+- A minimal example that reproduces the issue
+- Relevant request data (without sensitive tokens)
+</Tip>
+
+<Note>
+Check the [Error Handling](/errors) page for general error formats and best practices for handling API errors in your code.
+</Note>

@@ -33,6 +33,7 @@
         "group": "Support",
         "pages": [
           "errors",
+          "troubleshooting",
           "feedback"
         ]
       },
