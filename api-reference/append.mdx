@@ -10,6 +10,7 @@ The append endpoint converts Markdown text to Notion blocks and appends them dir
 
 **Full Markdown Support**: The append endpoint uses the same conversion engine as the `/api/convert` endpoint, which means it supports all markdown features including:
 - HTML colors: `<span style="color: red">colored text</span>`
+- Toggle blocks: `<details><summary>Title</summary>Content</details>`
 - GFM alerts (callouts): `> [!NOTE]`, `> [!WARNING]`, etc.
 - Nested lists with unlimited depth
 - Tables with headers

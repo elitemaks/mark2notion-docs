@@ -34,6 +34,7 @@ The convert endpoint transforms Markdown text into Notion block objects that can
 - **Blockquotes**: `> quoted text`
 - **GFM Alerts**: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`
 - **Horizontal Rules**: `---`, `***`, or `___`
+- **Toggle Blocks**: HTML `<details>` and `<summary>` tags for collapsible sections
 
 ### HTML Color Support
 
@@ -60,6 +61,54 @@ Paragraph with **bold <span style="color: red">red</span>** text.
 - List item with <span style="color: green">green text</span>
 ```
 
+### Toggle Blocks (Collapsible Sections)
+
+Create collapsible toggle blocks using HTML `<details>` and `<summary>` tags:
+
+```markdown
+<details>
+<summary>Click to expand</summary>
+
+Content inside the toggle block can include:
+- Headings
+- Lists
+- Paragraphs
+- Any other Markdown elements
+
+</details>
+```
+
+**Features:**
+- Summary text supports **bold** (`<b>` or `<strong>`) and *italic* (`<i>` or `<em>`) formatting
+- Content can include any Markdown elements (headings, lists, code blocks, etc.)
+- Nested details blocks are not supported
+- Malformed HTML is silently ignored
+
+**Examples:**
+
+```markdown
+<details>
+<summary><b>Email Summary</b></summary>
+
+## Section 1 Title
+- Bullet point 1
+- Bullet point 2
+
+## Section 2 Title
+- Another bullet point
+
+</details>
+```
+
+```markdown
+<details>
+<summary><i>Optional Settings</i></summary>
+
+Configure advanced options here.
+
+</details>
+```
+
 ### Generated Notion Block Types
 
 | Markdown Element | Notion Block Type | Notes |
@@ -74,6 +123,7 @@ Paragraph with **bold <span style="color: red">red</span>** text.
 | `![alt](url)` | `image` | External images |
 | `\| Table \|` | `table` | With headers |
 | `---` | `divider` | Horizontal rules |
+| `<details>` | `toggle` | Collapsible sections with children |
 
 ## Text Length Handling
 
