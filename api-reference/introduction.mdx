@@ -75,8 +75,7 @@ await fetch('https://api.mark2notion.com/api/clear-page', {
   method: 'POST',
   headers: { 'x-api-key': 'YOUR_KEY' },
   body: JSON.stringify({
-    notionToken: 'secret_TOKEN',
-    pageId: 'your-page-id'
+    pageId: 'https://notion.so/Your-Page-Title-abc123'
   })
 });
 
@@ -86,8 +85,7 @@ await fetch('https://api.mark2notion.com/api/append', {
   headers: { 'x-api-key': 'YOUR_KEY' },
   body: JSON.stringify({
     markdown: '# New Content',
-    notionToken: 'secret_TOKEN',
-    pageId: 'your-page-id'
+    pageId: 'https://notion.so/Your-Page-Title-abc123'
   })
 });
 ```
@@ -112,7 +110,6 @@ for (const pageId of ['page1', 'page2', 'page3']) {
     headers: { 'x-api-key': 'YOUR_KEY' },
     body: JSON.stringify({
       blocks,
-      notionToken: 'secret_TOKEN',
       pageId
     })
   });

@@ -14,29 +14,34 @@ First, you'll need to get your API key from the Mark2Notion dashboard.
   <Step title="Get API Key">
     Navigate to your dashboard and copy your API key.
   </Step>
-  <Step title="Set Up Notion Integration">
-    Create a Notion integration and get your Notion token from [notion.so/my-integrations](https://notion.so/my-integrations). 
-    
-    Need help with Notion? Follow this guide: [Getting started with the Notion API](https://developers.notion.com/docs/getting-started).
+  <Step title="Connect Notion (for page operations)">
+    Click "Connect Notion" in your [dashboard](https://dashboard.mark2notion.com) to authorize access to your workspace via OAuth. Required for `/append`, `/append-blocks`, `/clear-page`, and `/notion-to-markdown`.
   </Step>
 </Steps>
 
-## Notion Setup
+## Get the Page URL or ID
 
-1. **Create a Notion Integration**
-   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
-   - Create a new integration
-   - Copy the integration token
+Pass a URL or page ID as the `pageId` parameter:
+- Full Notion page URL: `https://notion.so/Your-Page-Title-abc123def456`
+- Or just the page ID: `abc123def456`
 
-2. **Share Your Notion Page with the Integration**
-   - Open your target Notion page
-   - Click the three dots (•••) in the top right corner
-   - Select "Connections" → "Add connection"
-   - Find and select your integration from the list
+Both formats are accepted — the API normalizes them automatically.
 
-3. **Get the Page ID**
-   - From the page URL: `notion.so/page-name-PAGE_ID`
-   - Or from the "Copy link" option
+## Using a Manual Notion Token (Advanced)
+
+If you prefer not to use OAuth, you can pass a `notionToken` directly in each request instead.
+
+<Steps>
+  <Step title="Create a Notion Integration">
+    Go to [notion.so/my-integrations](https://notion.so/my-integrations), click "New integration", select your workspace, and copy the Internal Integration Token (starts with `ntn_`).
+  </Step>
+  <Step title="Share the Target Page">
+    Open your Notion page, click the **···** menu → **Connections** → **Add connection**, then select your integration. Repeat for each page you want to access.
+  </Step>
+  <Step title="Pass the Token in Requests">
+    Include `notionToken` in your request body alongside `pageId`. The OAuth connection is not needed when a token is provided directly.
+  </Step>
+</Steps>
 
 ## Make Your First Request
 

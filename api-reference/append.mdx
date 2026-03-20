@@ -28,12 +28,12 @@ If you already have Notion block JSON (for example from a previous `/convert` ca
   The Markdown content to convert and append. The API accepts both actual newlines and escaped sequences (`\n`, `\r\n`, `\r`), so you can use either format based on your tooling.
 </ParamField>
 
-<ParamField body="notionToken" type="string" required>
-  Your Notion integration token (from notion.so/my-integrations)
+<ParamField body="notionToken" type="string">
+  Your Notion integration token. Optional when your workspace is connected via OAuth in the dashboard. Pass this if you prefer to authenticate with a manual integration token instead. See [Using a Manual Notion Token](/quickstart#using-a-manual-notion-token-advanced).
 </ParamField>
 
 <ParamField body="pageId" type="string" required>
-  The ID of the Notion page to append content to
+  The URL or page ID of the Notion page to append content to. Pass the full `notion.so` page URL or just the page ID — both are accepted.
 </ParamField>
 
 <ParamField body="after" type="string">
@@ -78,8 +78,7 @@ curl -X POST "https://api.mark2notion.com/api/append" \
   -H "x-api-key: YOUR_API_KEY" \
   -d '{
     "markdown": "# New Section\n\nThis content will be appended to my Notion page.\n\n- Item 1\n- Item 2",
-    "notionToken": "secret_NOTION_INTEGRATION_TOKEN",
-    "pageId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    "pageId": "https://notion.so/Your-Page-Title-a1b2c3d4e5f67890abcdef1234567890"
   }'
 ```
 
@@ -97,8 +96,7 @@ This content will be appended to my Notion page.
 
 - Item 1
 - Item 2`,
-    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
-    pageId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+    pageId: 'https://notion.so/Your-Page-Title-a1b2c3d4e5f67890abcdef1234567890'
   })
 });
 
@@ -122,8 +120,7 @@ This content will be appended to my Notion page.
 
 - Item 1
 - Item 2''',
-        'notionToken': 'secret_NOTION_INTEGRATION_TOKEN',
-        'pageId': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        'pageId': 'https://notion.so/Your-Page-Title-a1b2c3d4e5f67890abcdef1234567890'
     }
 )
 
@@ -201,8 +198,7 @@ Specify a block ID to append content after a specific block:
 ```json
 {
   "markdown": "# New content",
-  "notionToken": "secret_...",
-  "pageId": "page-id",
+  "pageId": "https://notion.so/Your-Page-Title-abc123",
   "after": "block-id-to-append-after"
 }
 ```
@@ -240,22 +236,7 @@ Each append API call counts as **1 usage** regardless of complexity. The `reques
 
 ## Notion Setup
 
-Before using the append endpoint, you need:
-
-1. **Create a Notion Integration**
-   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
-   - Create a new integration
-   - Copy the integration token
-
-2. **Share Your Notion Page with the Integration**
-   - Open your target Notion page
-   - Click the three dots (•••) in the top right corner
-   - Select "Connections" → "Add connection"
-   - Find and select your integration from the list
-
-3. **Get the Page ID**
-   - From the page URL: `notion.so/page-name-PAGE_ID`
-   - Or from the "Copy link" option
+Before using the append endpoint, connect your Notion workspace in the [dashboard](https://dashboard.mark2notion.com) via OAuth. Then pass your target page as a URL or page ID in the `pageId` field.
 
 ## Error Responses
 

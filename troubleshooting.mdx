@@ -92,22 +92,19 @@ The page ID you provided is not in the correct UUID format. Notion page IDs must
 
 **Solutions**:
 
-1. **Get the correct page ID from the URL**:
+1. **Easiest: pass the full Notion page URL** — the API normalizes it automatically:
 ```
-https://notion.so/My-Page-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p
-                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                              This is the page ID (32 chars, no hyphens)
+"pageId": "https://notion.so/My-Page-1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p"
 ```
 
-2. **Format it correctly with hyphens**:
-   - Notion page IDs must follow UUID format: `8-4-4-4-12` characters separated by hyphens
-   - Example: `1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p`
-   - You can use online UUID formatters or Notion's "Copy link" feature to get the properly formatted ID
+2. **Or pass just the page ID** (with or without hyphens):
+   - Copy the 32-character ID from the end of the page URL
+   - Example with hyphens: `1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p`
+   - Example without hyphens: `1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p`
 
 3. **Don't use these as page IDs**:
    - ❌ Page titles: `"My-Multi-Category-Document"`
    - ❌ Literal strings: `"null"`, `"<string>"`
-   - ❌ URLs: `"https://notion.so/..."`
 
 </Accordion>
 
@@ -133,26 +130,23 @@ Your Notion integration doesn't have access to the page, or the page doesn't exi
 
 **Solutions**:
 
-1. **Share the page with your integration**:
-   - Open your target Notion page
-   - Click the three dots (•••) in the top right corner
-   - Select "Connections" → "Add connection"
-   - Find and select your integration from the list
+1. **Check your Notion connection in the [dashboard](https://dashboard.mark2notion.com)**:
+   - Make sure your Notion workspace is connected via OAuth
+   - The connected account must have access to the target page or its parent page/database
+   - Try reconnecting if you recently moved or restructured pages
 
 2. **Verify the page exists**:
    - Try opening the page URL in your browser
    - Check if the page was recently deleted or archived
    - Confirm you're in the correct workspace
 
-3. **Check integration permissions**:
-   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
-   - Find your integration
-   - Verify it has "Content" capabilities
-   - Check which workspaces it's installed in
+3. **If using a manual `notionToken`**:
+   - Share the page with your integration via **···** → **Connections** → **Add connection**
+   - For pages in databases, share the entire database — individual pages inherit access
 
-4. **For pages in databases**:
-   - Share the entire database with your integration
-   - Individual pages inherit database permissions
+4. **Check integration permissions**:
+   - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
+   - Verify the integration is active and has "Content" capabilities
 
 <Tip>
 If you just shared a page with your integration, wait a few seconds before making API requests. Notion may need a moment to propagate permissions.
@@ -187,10 +181,9 @@ You're trying to use a block ID in the `pageId` parameter. All endpoints require
    Example:
    ```json
    {
-     "pageId": "12345678-1234-1234-1234-123456789abc",
+     "pageId": "https://notion.so/My-Page-12345678123412341234123456789abc",
      "after": "abcd1234-5678-90ef-abcd-ef1234567890",
-     "markdown": "# Your content",
-     "notionToken": "secret_xxx"
+     "markdown": "# Your content"
    }
    ```
 
@@ -316,7 +309,6 @@ If you're still seeing this error, it may indicate an issue with your Notion int
 ```json
 {"markdown": "Markdown is required"}
 {"pageId": "Page ID is required"}
-{"notionToken": "Notion token is required"}
 {"blocks": "Blocks must be a non-empty array"}
 ```
 
@@ -336,7 +328,7 @@ Your request is missing required parameters.
    - ❌ Sending empty strings: `markdown: ""`
    - ❌ Wrong data types: `pageId: 123` (should be string)
    - ❌ Empty arrays: `blocks: []`
-   - ❌ Undefined/null values: `notionToken: null`
+   - ❌ Undefined/null values: `pageId: null`
 
 </Accordion>
 
@@ -421,8 +413,7 @@ fetch('/api/append', {
   },
   body: JSON.stringify({
     markdown: content,
-    pageId: pageId,
-    notionToken: token
+    pageId: pageId
   })
 });
 ```
@@ -457,25 +448,17 @@ API token is invalid.
 ```
 
 **What This Means**:
-The Notion integration token you provided is invalid or has been revoked.
+The Notion integration token is invalid or has been revoked.
 
 **Solutions**:
 
-1. **Verify your token**:
+1. **Check your Notion connection in the [dashboard](https://dashboard.mark2notion.com)** — reconnect your workspace if needed
+
+2. **If using a manual `notionToken`**:
    - Go to [notion.so/my-integrations](https://notion.so/my-integrations)
-   - Find your integration
-   - Check if it's active (not deleted)
+   - Verify the integration is active (not deleted)
    - Regenerate a new secret if needed
-
-2. **Check token format**:
-   - Notion tokens start with `ntn_`
-   - Should be a long alphanumeric string
-   - No extra spaces or quotes
-
-3. **Common mistakes**:
-   - Using an old/expired token
-   - Copy-pasting with extra spaces
-   - Using a different workspace's token
+   - Tokens start with `ntn_` — check for extra spaces when copying
 
 </Accordion>
 

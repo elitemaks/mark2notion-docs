@@ -115,30 +115,24 @@ X-Usage-Remaining: 50
 <Accordion title="Invalid Notion Token">
 **Error**: `"Invalid Notion token or insufficient permissions"`
 
-**Causes**:
-- Wrong token format
-- Token has been revoked
-- Integration doesn't have access to the workspace
-
-**Solution**: 
-1. Check your token at [notion.so/my-integrations](https://notion.so/my-integrations)
-2. Ensure the integration is active
-3. Verify workspace permissions
+**Solution**:
+1. First, check that your Notion workspace is connected in the [dashboard](https://dashboard.mark2notion.com) — reconnect if needed
+2. If using a manual `notionToken`, verify it's still active at [notion.so/my-integrations](https://notion.so/my-integrations)
+3. Ensure the integration has access to the target workspace
 </Accordion>
 
 <Accordion title="Page Not Found">
 **Error**: `"Page not found or access denied"`
 
 **Causes**:
-- Page ID is incorrect
+- Page URL or ID is incorrect
 - Page has been deleted
-- Integration doesn't have access to the page
-- Page is in a different workspace
+- Notion connection doesn't have access to the page
 
 **Solution**:
-1. Verify the page ID from the URL
-2. Share the page with your integration
-3. Check if the page exists
+1. First, check that your Notion workspace is connected in the [dashboard](https://dashboard.mark2notion.com) and that the connected account has access to this page (or its parent)
+2. Verify the page URL or ID is correct (copy directly from Notion)
+3. If using a manual `notionToken`, share the page with your integration via **···** → **Connections**
 </Accordion>
 
 ### Content Validation

@@ -18,12 +18,12 @@ Use the append-blocks endpoint when you already have an array of Notion block ob
   Array of Notion block objects you want to append. Each block must follow the structure expected by the Notion API, including nested `children` when needed.
 </ParamField>
 
-<ParamField body="notionToken" type="string" required>
-  Your Notion integration token (from notion.so/my-integrations)
+<ParamField body="notionToken" type="string">
+  Your Notion integration token. Optional when your workspace is connected via OAuth in the dashboard. Pass this if you prefer to authenticate with a manual integration token instead. See [Using a Manual Notion Token](/quickstart#using-a-manual-notion-token-advanced).
 </ParamField>
 
 <ParamField body="pageId" type="string" required>
-  The ID of the Notion page to append content to
+  The URL or page ID of the Notion page to append blocks to. Pass the full `notion.so` page URL or just the page ID — both are accepted.
 </ParamField>
 
 <ParamField body="after" type="string">
@@ -88,8 +88,7 @@ curl -X POST "https://api.mark2notion.com/api/append-blocks" \
         }
       }
     ],
-    "notionToken": "secret_NOTION_INTEGRATION_TOKEN",
-    "pageId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    "pageId": "https://notion.so/Your-Page-Title-a1b2c3d4e5f67890abcdef1234567890"
   }'
 ```
 
@@ -129,8 +128,7 @@ const response = await fetch('https://api.mark2notion.com/api/append-blocks', {
   },
   body: JSON.stringify({
     blocks,
-    notionToken: 'secret_NOTION_INTEGRATION_TOKEN',
-    pageId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+    pageId: 'https://notion.so/Your-Page-Title-a1b2c3d4e5f67890abcdef1234567890'
   })
 });
 
@@ -164,8 +162,7 @@ response = requests.post(
     },
     json={
         'blocks': blocks,
-        'notionToken': 'secret_NOTION_INTEGRATION_TOKEN',
-        'pageId': 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+        'pageId': 'https://notion.so/Your-Page-Title-a1b2c3d4e5f67890abcdef1234567890'
     }
 )
 
